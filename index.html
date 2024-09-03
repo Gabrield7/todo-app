@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo app</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header>
+      <h1 class="todo-title">TODO</h1>
+      <button class="theme-button"></button>
+    </header>
+    <main>
+      <div class="add-task">
+        <span></span>
+        <input type="textarea" placeholder="Create a new todo...">
+      </div>
+      <section class="tasks-container">
+        <ul class="list-tasks"></ul>
+        <div class="task-filters">
+          <span></span>
+          <div class="filter-buttons">
+            <button class="filter-all">All</button>
+            <button class="filter-active">Active</button>
+            <button class="filter-completed">Completed</button>
+          </div>
+          <button class="clear-tasks">Clear Completed</button>
+        </div>
+      </section>
+      <div class="filter-buttons__mobile"></div>
+    </main>
+    <footer>Drag and drop to reorder list</footer>
+  </body>
+  <script src="./scripts/main.js" type="module"></script>
+  <!-- <script src="./scripts/dragAndDrop.js" type="module"></script> -->
+</html>
