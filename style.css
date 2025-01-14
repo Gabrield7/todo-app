@@ -35,6 +35,13 @@ body{
     min-width: 375px;
 }
 
+main{
+    display: flex;
+    flex-direction: column;
+    width: 536px;
+    margin: 0 auto;
+}
+/* HEADER */
 header{
     display: flex;
     justify-content: space-between;
@@ -61,14 +68,7 @@ header{
     cursor: pointer;
     transition: .5s;
 }
-
-main{
-    display: flex;
-    flex-direction: column;
-    width: 536px;
-    margin: 0 auto;
-}
-
+/* TASKS */
 .tasks-container{
     box-shadow: 2px 4px 20px var(--very-dark-grayish-blue);
     border-radius: 4px;
@@ -112,7 +112,6 @@ main{
     box-sizing: border-box; 
 }
 .task{
-    /* margin-bottom: 1px; */
     border-bottom: 1px solid rgba(0, 0, 0, .2);
     padding: 16px;
 }
@@ -130,50 +129,48 @@ main{
     flex-shrink: 0;
 }
 
-.dragging{
-    opacity: 0.5;
-}
-
 input[type='checkbox']{
     display: none;
 }
 
-input[type='checkbox'] + label:before, .add-task > span{
-    content: '';
+.custom-checkbox, .add-task > span{
     display: block;
+    height: 20px;
+    width: 20px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: var(--very-light-grayish-blue);
+    position: relative;
+}
+
+.custom-checkbox:hover{
+    background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+}
+
+.custom-checkbox::after, .add-task > span::after{
+    content: '';
     height: 16px;
     width: 16px;
-    flex-shrink: 0;
-    border: 2px solid var(--very-light-grayish-blue);
-    border-radius: 50%;
-}
-input[type='checkbox'] + label:before{
-    margin-right: 16px;
-}
-
-input[type='checkbox']:hover + label:before{
-    height: 20px;
-    width: 20px;
-    border:none;
-    background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 2px), black 0);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), black 0);
+    border-radius: 16px;
+    left: 2px;
+    top: 2px;
+    position: absolute;
+    background-color: var(--very-light-gray);
     cursor: pointer;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
 }
 
-input[type='checkbox']:checked + label:before{
-    content: '';
+input[type='checkbox']:checked + .custom-checkbox::after{
+    content: '✔';
+    font-size: 12px;
+    color: var(--very-light-gray);
     height: 20px;
     width: 20px;
-    border:none;
-    background-image: 
-        linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%)),
-        url('./images/icon-check.svg');
-    background-size: cover, 10px 8px;
-    background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
-    background-blend-mode: overlay;
-    mask: none;
+    left: 0px;
+    top: 0px;
+    background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
 }
 
 .check{
@@ -205,7 +202,7 @@ input[type='checkbox']:checked + label:before{
     background: transparent;
     text-decoration: none;
 }
-
+/* FILTERS */
 .task-filters{
     display: flex;
     justify-content: space-between;
@@ -252,18 +249,42 @@ body.dark .theme-button{
     background-image: url('./images/icon-sun.svg');
 }
 
-body.dark .add-task, body.dark .task, body.dark .task-filters, body.dark .filter-buttons__mobile{
+body.dark .add-task, body.dark .task,  body.dark .task-filters, body.dark .filter-buttons__mobile{
     background-color: var(--very-dark-desaturated-blue);
 }
 
-body.dark .task-description, body.dark .add-task>input, body.dark .add-task>input::placeholder{
-    color: var(--very-light-grayish-blue);
+body.dark .task-description, body.dark .add-task>input{
+    color: var(--very-light-grayish-blue) !important;
+}
+
+body.dark .add-task>input::placeholder{
+    color: var(--very-dark-grayish-blue);
 }
 
 body.dark .filter-buttons__mobile>button:hover, body.dark .task-filters>button:hover{
     color: var(--light-grayish-blue-hover);
 }
 
+body.dark .custom-checkbox, body.dark .add-task > span{
+    background: var(--very-dark-grayish-blue);
+}
+
+body.dark .custom-checkbox::after, body.dark .add-task > span::after{
+    background-color: var(--very-dark-desaturated-blue);
+}
+
+/* input[type='checkbox']:checked + .custom-checkbox::after{
+    content: '✔';
+    font-size: 12px;
+    color: var(--very-light-gray);
+    height: 20px;
+    width: 20px;
+    left: 0px;
+    top: 0px;
+    background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
+} */
+
+/* OTHER SCREENS SIZES */
 @media screen and (max-width: 650px){
     body{
         background-image: url('./images/bg-mobile-light.jpg');

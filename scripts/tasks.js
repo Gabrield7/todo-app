@@ -22,7 +22,8 @@ function createTaskElement(taskNumber, taskDescription){
     
     taskElement.innerHTML = `
     <input id='task-${taskNumber}' type='checkbox'>
-    <label for='task-${taskNumber}' class='task-description'>${taskDescription}</label>
+    <label for='task-${taskNumber}' class="custom-checkbox"></label>
+    <p class='task-description'>${taskDescription}</p>
     <button class='task-exclude'></button>`;
 
     tasksList.appendChild(taskElement);
@@ -102,7 +103,7 @@ function taskCheckEvent(input){
     });
 };
 
-function strikeDescription(input){
+function strikeDescription(input){ //Adds an 'strike' effect to content tasks marked as completed 
     const taskDescription = input.parentElement.querySelector('.task-description');
     
     if (!taskDescription.dataset.originalColor) {
@@ -114,7 +115,7 @@ function strikeDescription(input){
     taskDescription.style.color = input.checked ? 'var(--dark-grayish-blue)':taskDescription.dataset.originalColor;
 }
 
-function totalTasks(){
+function totalTasks(){ //Shows (and update) how many tasks laft to complete
     const tasks = getTasks();
     const taskFilters = document.querySelector('.task-filters span');
 

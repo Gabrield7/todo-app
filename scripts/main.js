@@ -4,11 +4,6 @@ import { completedFilter, allFilter, activeFilter, clearCompleted, moveFilterBut
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
-//DARK THEME
-theme.addEventListener('click', (e) => {
-    e.preventDefault();
-    body.classList.toggle('dark');
-});
 
 //TASKS 
 addTaskInput.addEventListener('keydown', (event) => {
@@ -30,3 +25,9 @@ completedFilter();
 allFilter();
 activeFilter();
 clearCompleted();
+
+//DARK THEME
+theme.addEventListener('click', (e) => {
+    e.preventDefault();
+    body.classList.toggle('dark');
+});
