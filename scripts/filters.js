@@ -1,12 +1,16 @@
-import { deleteTask} from "./tasks.js";
+import { deleteTask } from "./tasks.js";
 
 const tasksList = document.querySelector('.list-tasks');
 const filterButtons = document.querySelectorAll('.filter-buttons > button');
 const [filterAllBtn, filterActiveBtn, filterCompletedBtn] = filterButtons;
 const clearCompletedBtn = document.querySelector('.clear-tasks');
 
+let selectedFilter;
+//filterButtons.some(button => button === selectedFilter) 
+
 function restoreButtonStyle(btn){
-    const originalColor = btn.style.color;
+    // const originalColor = btn.style.color;
+    const originalColor = 'var(--dark-grayish-blue)';
 
     filterButtons.forEach(button => {
         button.style.color = originalColor;
@@ -23,6 +27,8 @@ function allFilter(){
 
         restoreButtonStyle(filterAllBtn);
     });
+
+    selectedFilter = filterAllBtn;
 }
 
 function activeFilter(){
@@ -36,6 +42,8 @@ function activeFilter(){
 
         restoreButtonStyle(filterActiveBtn);
     });
+
+    selectedFilter = filterActiveBtn;
 }
 
 function completedFilter(){
@@ -49,6 +57,8 @@ function completedFilter(){
 
         restoreButtonStyle(filterCompletedBtn);
     });
+
+    selectedFilter = filterCompletedBtn;
 }
 
 function clearCompleted(){
@@ -85,10 +95,6 @@ function moveFilterButtons() {
         });
 
     }
-
-    // console.log('mobile', filterButtonsMobile);
-    // console.log('desktop', filterButtonsDiv);
-    
 }
 
 export {completedFilter, allFilter, activeFilter, clearCompleted, moveFilterButtons};

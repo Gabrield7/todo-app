@@ -13,7 +13,6 @@
     --very-dark-grayish-blue-1: hsl(233, 14%, 35%);
     --very-dark-grayish-blue-2: hsl(237, 14%, 26%);
     
-
     --bright-blue: hsl(220, 98%, 61%);
 
     --main-font: "Josefin Sans", sans-serif;
@@ -173,12 +172,12 @@ input[type='checkbox']:checked + .custom-checkbox::after{
     background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
 }
 
-.check{
+/* .check{
     position: absolute;
     height: 10px;
     width: 10px;
     margin-left: 5px;
-}
+} */
 
 .task-exclude{
     background-image: url('./images/icon-cross.svg');
@@ -273,16 +272,9 @@ body.dark .custom-checkbox::after, body.dark .add-task > span::after{
     background-color: var(--very-dark-desaturated-blue);
 }
 
-/* input[type='checkbox']:checked + .custom-checkbox::after{
-    content: '✔';
-    font-size: 12px;
-    color: var(--very-light-gray);
-    height: 20px;
-    width: 20px;
-    left: 0px;
-    top: 0px;
+body.dark .custom-checkbox:hover{
     background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
-} */
+}
 
 /* OTHER SCREENS SIZES */
 @media screen and (max-width: 650px){

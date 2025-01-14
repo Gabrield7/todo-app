@@ -3,6 +3,14 @@ import { initializeDragAndDrop } from './dragAndDrop.js'
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
 
+// const todo = {
+//     tasks: [],
+//     settings: {
+//         theme: null,
+//         filter: all
+//     }
+// }
+
 function getTasks(){
     return JSON.parse(localStorage.getItem('tasks')) || [];
 };
@@ -115,7 +123,7 @@ function strikeDescription(input){ //Adds an 'strike' effect to content tasks ma
     taskDescription.style.color = input.checked ? 'var(--dark-grayish-blue)':taskDescription.dataset.originalColor;
 }
 
-function totalTasks(){ //Shows (and update) how many tasks laft to complete
+function totalTasks(){ //Shows (and update) how many tasks left to complete
     const tasks = getTasks();
     const taskFilters = document.querySelector('.task-filters span');
 
