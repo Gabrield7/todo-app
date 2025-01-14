@@ -5,63 +5,45 @@ const filterButtons = document.querySelectorAll('.filter-buttons > button');
 const [filterAllBtn, filterActiveBtn, filterCompletedBtn] = filterButtons;
 const clearCompletedBtn = document.querySelector('.clear-tasks');
 
-let selectedFilter;
-//filterButtons.some(button => button === selectedFilter) 
+const state = { //Stores in a exportable variable the actual selected filter
+    selectedFilter: null,
+};
 
 function restoreButtonStyle(btn){
-    // const originalColor = btn.style.color;
     const originalColor = 'var(--dark-grayish-blue)';
 
     filterButtons.forEach(button => {
-        button.style.color = originalColor;
+        button.style.color = button === btn? 'var(--bright-blue)' : originalColor;
     });
+};
 
-    btn.style.color = 'var(--bright-blue)';
-}
+function displayElement(element, filterBtn){
+    const isFilterAll = filterBtn === filterAllBtn;
+    const isFilterActive = filterBtn === filterActiveBtn;
+    
+    if(isFilterAll) {
+        element.style.display = 'flex';  
+    }else {
+        const taskState = element.querySelector('input').checked;
+        element.style.display = (isFilterActive ? taskState : !taskState) ? 'none' : 'flex';
+    }
+};
 
-function allFilter(){   
-    filterAllBtn.addEventListener('click', () => {
+function applyFilter(filterBtn){
+    filterBtn.addEventListener('click', () => {
         const taskElements = tasksList.querySelectorAll('.task');
+        
+        taskElements.forEach(element => displayElement(element, filterBtn));
 
-        taskElements.forEach(element => element.style.display = 'flex');
-
-        restoreButtonStyle(filterAllBtn);
+        restoreButtonStyle(filterBtn);
+        state.selectedFilter = filterBtn; // Updates the selected filter
     });
+};
 
-    selectedFilter = filterAllBtn;
-}
 
-function activeFilter(){
-    filterActiveBtn.addEventListener('click', () => {
-        const taskElements = tasksList.querySelectorAll('.task');
+const applyFilterButton = () => {
+    filterButtons.forEach(button => applyFilter(button));
 
-        taskElements.forEach(element => {
-            const taskState = element.querySelector('input').checked;
-            element.style.display = taskState ? 'none' : 'flex';
-        });
-
-        restoreButtonStyle(filterActiveBtn);
-    });
-
-    selectedFilter = filterActiveBtn;
-}
-
-function completedFilter(){
-    filterCompletedBtn.addEventListener('click', () => {    
-        const taskElements = tasksList.querySelectorAll('.task');
-
-        taskElements.forEach(element => {
-            const taskState = element.querySelector('input').checked;
-            element.style.display = !taskState ? 'none' : 'flex';
-        });
-
-        restoreButtonStyle(filterCompletedBtn);
-    });
-
-    selectedFilter = filterCompletedBtn;
-}
-
-function clearCompleted(){
     clearCompletedBtn.addEventListener('click', () => {
         const taskElements = tasksList.querySelectorAll('.task');
 
@@ -72,8 +54,8 @@ function clearCompleted(){
                 deleteTask(element);
             } 
         });
-    })
-}
+    });
+};
 
 function moveFilterButtons() {
     const filterButtonsDiv = document.querySelector('.filter-buttons');
@@ -83,7 +65,7 @@ function moveFilterButtons() {
         filterButtonsMobile.style.display = 'none';
         if(filterButtonsMobile.contains(btn)){
             filterButtonsDiv.appendChild(btn);
-        }
+        };
     });
 
     if (window.innerWidth < 501) {
@@ -93,8 +75,7 @@ function moveFilterButtons() {
                 filterButtonsMobile.appendChild(btn);
             }
         });
+    };
+};
 
-    }
-}
-
-export {completedFilter, allFilter, activeFilter, clearCompleted, moveFilterButtons};
+export {state, filterButtons, applyFilterButton, displayElement, moveFilterButtons};

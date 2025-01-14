@@ -1,16 +1,15 @@
 import { createTask, getTasks, renderTasks, totalTasks} from "./tasks.js";
-import { completedFilter, allFilter, activeFilter, clearCompleted, moveFilterButtons } from "./filters.js";
+import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
 
+const tasksList = document.querySelector('.list-tasks');
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
 
-console.log(getTasks());
-
 //TASKS 
 addTaskInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
-        event.preventDefault(); // Previne a quebra de linha no textarea
+        event.preventDefault(); // Prevents the line break in the textarea 
 
         createTask();
     }
@@ -23,10 +22,14 @@ window.addEventListener('resize', moveFilterButtons);
 document.addEventListener('DOMContentLoaded', moveFilterButtons);
 
 //Filters
-completedFilter();
-allFilter();
-activeFilter();
-clearCompleted();
+if (!state.selectedFilter && tasksList.childElementCount !== 0){
+    console.log('ok');
+    
+    state.selectedFilter = filterButtons[0];
+    state.selectedFilter.style.color = 'var(--bright-blue)';
+}; 
+
+applyFilterButton();
 
 //DARK THEME
 theme.addEventListener('click', (e) => {

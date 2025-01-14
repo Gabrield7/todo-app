@@ -1,4 +1,5 @@
 import { initializeDragAndDrop } from './dragAndDrop.js'
+import { state, filterButtons, displayElement } from './filters.js'
 
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
@@ -60,6 +61,9 @@ function createTask(){
         addTaskInput.value = '';
     
         updateTaskList(task);
+
+        const taskElements = tasksList.querySelectorAll('.task');
+        taskElements.forEach(element => displayElement(element, state.selectedFilter));
     }
 };
 
@@ -72,6 +76,13 @@ function deleteTask(element){
     
     const filteredTasks = tasks.filter(task => task.number !== taskNumber);
     localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+    
+    //Restore the 'filter' button style
+    if(tasksList.childElementCount === 0){
+        filterButtons.forEach(button => {
+            button.style.color = 'var(--dark-grayish-blue)';
+        });
+    };
 }
 
 function deleteEventClick(button){
@@ -108,6 +119,9 @@ function taskCheckEvent(input){
         localStorage.setItem('tasks', JSON.stringify(tasks));
         strikeDescription(input);
         totalTasks();
+
+        const taskElements = tasksList.querySelectorAll('.task');
+        taskElements.forEach(element => displayElement(element, state.selectedFilter));
     });
 };
 
