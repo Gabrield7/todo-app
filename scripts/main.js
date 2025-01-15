@@ -1,19 +1,27 @@
 import { createTask, renderTasks, totalTasks, todo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
 
-const tasksList = document.querySelector('.list-tasks');
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
 
 //TASKS 
-addTaskInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Prevents the line break in the textarea 
+addTaskInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // Prevents the line break in the textarea 
 
         createTask();
     };
 });
+
+// addTaskInput.addEventListener('blur', (e) => {
+//     if (addTaskInput.value !== '') {
+//         e.preventDefault();
+        
+//         createTask();
+//     };
+// });
+
 
 //FILTERS
 if (!state.selectedFilter) {

@@ -19,17 +19,20 @@ function updateTaskList(task){
 }
 
 function createTaskElement(taskID, taskDescription){
-    const taskElement = document.createElement('li');
+    const taskBox = document.createElement('li');
+    taskBox.classList.add('task-box');
+
+    const taskElement = document.createElement('div');
     taskElement.classList.add('task');
-    taskElement.setAttribute('draggable', 'true');
     
     taskElement.innerHTML = `
     <input id='task-${taskID}' type='checkbox'>
     <label for='task-${taskID}' class="custom-checkbox"></label>
     <p class='task-description'>${taskDescription}</p>
     <button class='task-exclude'></button>`;
-
-    tasksList.appendChild(taskElement);
+    
+    taskBox.appendChild(taskElement);
+    tasksList.appendChild(taskBox);
 
     const input = taskElement.querySelector('input');
     taskCheckEvent(input);
@@ -37,7 +40,7 @@ function createTaskElement(taskID, taskDescription){
     const deleteButton = taskElement.querySelector('.task-exclude');
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
 
-    initializeDragAndDrop();
+    //initializeDragAndDrop();
     return taskElement;
 }
 
@@ -56,8 +59,8 @@ function createTask(){
     
         updateTaskList(task);
 
-        const taskElements = tasksList.querySelectorAll('.task');
-        taskElements.forEach(element => displayElement(element, state.selectedFilter));
+        const taskBoxes = tasksList.querySelectorAll('.task-box');
+        displayElement(taskBoxes, state.selectedFilter);
     }
 };
 
@@ -96,9 +99,10 @@ function renderTasks() {
         const taskInput = taskElement.querySelector('input');
         taskInput.checked = task && task.completed? true:false;
         strikeDescription(taskInput);
-
-        displayElement(taskElement, state.selectedFilter);
     });
+
+    const taskBoxes = tasksList.querySelectorAll('.task-box');
+    displayElement(taskBoxes, state.selectedFilter);
 }
 
 function taskCheckEvent(input){
@@ -112,8 +116,8 @@ function taskCheckEvent(input){
         strikeDescription(input);
         totalTasks();
 
-        const taskElements = tasksList.querySelectorAll('.task');
-        taskElements.forEach(element => displayElement(element, state.selectedFilter));
+        const taskBoxes = tasksList.querySelectorAll('.task-box');
+        displayElement(taskBoxes, state.selectedFilter);
     });
 };
 

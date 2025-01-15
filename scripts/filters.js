@@ -17,45 +17,52 @@ function restoreButtonStyle(btn){
     });
 };
 
-function displayElement(element, filterBtn){
-    const isFilterAll = filterBtn === filterAllBtn;
-    const isFilterActive = filterBtn === filterActiveBtn;
+function displayElement(list, filterBtn){
     
-    if(isFilterAll) {
-        element.style.display = 'flex';  
-    }else {
-        const taskState = element.querySelector('input').checked;
-        element.style.display = (isFilterActive ? taskState : !taskState) ? 'none' : 'flex';
-    }
+    list.forEach(element => {
+        //console.log('display');
+        //console.log(element);
+        
+        const taskElement = element.querySelector('.task');
+    
+        const isFilterAll = filterBtn=== filterAllBtn;
+        const isFilterActive = filterBtn === filterActiveBtn;
+        
+        if(isFilterAll) {
+            element.style.display = 'flex';  
+        }else {
+            const taskState = taskElement.querySelector('input').checked;       
+            element.style.display = (isFilterActive ? taskState : !taskState)? 'none':'flex';
+        };
+    });
+    
 };
 
 function applyFilter(filterBtn){
     filterBtn.addEventListener('click', () => {
-        const taskElements = tasksList.querySelectorAll('.task');
-        
-        taskElements.forEach(element => displayElement(element, filterBtn));
+        const taskBoxes = tasksList.querySelectorAll('.task-box');
+        //taskBoxes.forEach(element => displayElement(element, state.selectedFilter));
+        displayElement(taskBoxes, filterBtn);
 
         restoreButtonStyle(filterBtn);
         state.selectedFilter = filterBtn; // Updates the selected exportable filter variable
 
         todo.filter = filterBtn.textContent;
-        localStorage.setItem('todo', JSON.stringify(todo)); //Updates the selected filter in LocalStorage
+        localStorage.setItem('todo', JSON.stringify(todo)); // Updates the selected filter in LocalStorage
     });
 };
-
 
 const applyFilterButton = () => {
     filterButtons.forEach(button => applyFilter(button));
 
     clearCompletedBtn.addEventListener('click', () => {
-        const taskElements = tasksList.querySelectorAll('.task');
+        //const taskElements = tasksList.querySelectorAll('.task');
+        const taskBoxes = tasksList.querySelectorAll('.task-box');
 
-        taskElements.forEach(element => {
+        taskBoxes.forEach(element => {
             const taskState = element.querySelector('input').checked;
             
-            if(taskState){
-                deleteTask(element);
-            } 
+            if(taskState) deleteTask(element);
         });
     });
 };
