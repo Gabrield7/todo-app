@@ -4,34 +4,28 @@ import { state, filterButtons, displayElement } from './filters.js'
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
 
-// const todo = {
-//     tasks: [],
-//     settings: {
-//         theme: null,
-//         filter: all
-//     }
-// }
-
-function getTasks(){
-    return JSON.parse(localStorage.getItem('tasks')) || [];
+const initialTodo = {
+    tasks: [],
+    theme: 'light',
+    filter: state.selectedFilter || 'All'
 };
+const todo = JSON.parse(localStorage.getItem('todo')) || initialTodo;
 
 function updateTaskList(task){
-    const tasks = getTasks();
-    tasks.push(task); //adds the new task to the 'tasks' array
-    localStorage.setItem('tasks', JSON.stringify(tasks)); //updates the task list in the localStorage
+    todo.tasks.push(task); //adds the new task to the 'tasks' array
+    localStorage.setItem('todo', JSON.stringify(todo)); //updates the task list in the localStorage
     totalTasks();
-    return tasks;
+    return todo.tasks;
 }
 
-function createTaskElement(taskNumber, taskDescription){
+function createTaskElement(taskID, taskDescription){
     const taskElement = document.createElement('li');
     taskElement.classList.add('task');
     taskElement.setAttribute('draggable', 'true');
     
     taskElement.innerHTML = `
-    <input id='task-${taskNumber}' type='checkbox'>
-    <label for='task-${taskNumber}' class="custom-checkbox"></label>
+    <input id='task-${taskID}' type='checkbox'>
+    <label for='task-${taskID}' class="custom-checkbox"></label>
     <p class='task-description'>${taskDescription}</p>
     <button class='task-exclude'></button>`;
 
@@ -44,20 +38,20 @@ function createTaskElement(taskNumber, taskDescription){
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
 
     initializeDragAndDrop();
+    return taskElement;
 }
 
 function createTask(){
-    const taskNumberArray = getTasks().map(task => task.number) || [];
-    const taskNumber = taskNumberArray.length > 0 ? Math.max(...taskNumberArray)+1 : 1; //gets the max task number saved in localStorage
+    const taskIdArray = todo.tasks.map((_, index) => index);
+    const taskID = taskIdArray.length > 0? Math.max(...taskIdArray)+1 : 0; //gets the max task number saved in localStorage
     
-    if(addTaskInput.value !== '' && taskNumber){
+    if(addTaskInput.value !== ''){
         const task = {
             "description": addTaskInput.value,
-            "number": taskNumber,
             "completed": false
         };
     
-        createTaskElement(task.number, task.description);
+        createTaskElement(taskID, task.description);
         addTaskInput.value = '';
     
         updateTaskList(task);
@@ -68,14 +62,14 @@ function createTask(){
 };
 
 function deleteTask(element){
-    const tasks = getTasks();
     element.remove();
 
-    const taskId = element.querySelector('input').id;
-    const taskNumber = Number(taskId.split('-')[1]);
+    const taskID = element.querySelector('input').id;
+    const taskNumber = Number(taskID.split('-')[1]);
     
-    const filteredTasks = tasks.filter(task => task.number !== taskNumber);
-    localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+    todo.tasks.splice(taskNumber, 1); //Removes que selected task
+    
+    localStorage.setItem('todo', JSON.stringify(todo));
     
     //Restore the 'filter' button style
     if(tasksList.childElementCount === 0){
@@ -94,29 +88,27 @@ function deleteEventClick(button){
 };
 
 function renderTasks() {
-    const tasks = getTasks();
-    tasks.forEach(task => createTaskElement(task.number, task.description)); //recreate the tasks when the page is reloaded
+    if(todo.tasks.length === 0) return;
 
-    const taskElements = tasksList.querySelectorAll('.task');
-    taskElements.forEach(element => {
-        const taskInput = element.querySelector('input');
-        const taskNumber = Number(taskInput.id.split('-')[1]);
-        const task = tasks.find(task => task.number === taskNumber);
-        
-        taskInput.checked = task && task.completed ? true:false;
+    todo.tasks.forEach((task, index) =>{
+        const taskElement = createTaskElement(index, task.description); //recreate the tasks when the page is reloaded
+
+        const taskInput = taskElement.querySelector('input');
+        taskInput.checked = task && task.completed? true:false;
         strikeDescription(taskInput);
+
+        displayElement(taskElement, state.selectedFilter);
     });
 }
 
 function taskCheckEvent(input){
     input.addEventListener('change', () => {
-        const tasks = getTasks();
-        const taskNumber = Number(input.id.split('-')[1]); //task number regitered in DOM
-        const taskIndex = tasks.findIndex(task => task.number === taskNumber);
+        const taskID = Number(input.id.split('-')[1]); //task number regitered in DOM
+        const taskIndex = todo.tasks.findIndex((_, index) => index === taskID);
         
-        tasks[taskIndex].completed = input.checked ? true:false;
+        todo.tasks[taskIndex].completed = input.checked ? true:false;
         
-        localStorage.setItem('tasks', JSON.stringify(tasks));
+        localStorage.setItem('todo', JSON.stringify(todo));
         strikeDescription(input);
         totalTasks();
 
@@ -138,11 +130,11 @@ function strikeDescription(input){ //Adds an 'strike' effect to content tasks ma
 }
 
 function totalTasks(){ //Shows (and update) how many tasks left to complete
-    const tasks = getTasks();
+    const tasks = todo.tasks;
     const taskFilters = document.querySelector('.task-filters span');
 
     const total = tasks.filter(task => task.completed === false).length;
     taskFilters.textContent = `${total} items left`;
 }
 
-export {createTask, renderTasks, deleteTask, totalTasks, getTasks};
+export {createTask, renderTasks, deleteTask, totalTasks, todo};

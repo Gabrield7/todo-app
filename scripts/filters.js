@@ -1,4 +1,4 @@
-import { deleteTask } from "./tasks.js";
+import { todo, deleteTask } from "./tasks.js";
 
 const tasksList = document.querySelector('.list-tasks');
 const filterButtons = document.querySelectorAll('.filter-buttons > button');
@@ -36,7 +36,10 @@ function applyFilter(filterBtn){
         taskElements.forEach(element => displayElement(element, filterBtn));
 
         restoreButtonStyle(filterBtn);
-        state.selectedFilter = filterBtn; // Updates the selected filter
+        state.selectedFilter = filterBtn; // Updates the selected exportable filter variable
+
+        todo.filter = filterBtn.textContent;
+        localStorage.setItem('todo', JSON.stringify(todo)); //Updates the selected filter in LocalStorage
     });
 };
 
