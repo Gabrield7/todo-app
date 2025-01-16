@@ -1,5 +1,6 @@
-import { initializeDragAndDrop } from './dragAndDrop.js'
-import { state, filterButtons, displayElement } from './filters.js'
+import { initializeDragAndDrop } from './dragAndDrop.js';
+import { state, filterButtons, displayElement } from './filters.js';
+import { applyCursorEvents } from './drag.js';
 
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
@@ -40,6 +41,7 @@ function createTaskElement(taskID, taskDescription){
     const deleteButton = taskElement.querySelector('.task-exclude');
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
 
+    applyCursorEvents(taskBox);
     //initializeDragAndDrop();
     return taskElement;
 }
@@ -61,7 +63,7 @@ function createTask(){
 
         const taskBoxes = tasksList.querySelectorAll('.task-box');
         displayElement(taskBoxes, state.selectedFilter);
-    }
+    };
 };
 
 function deleteTask(element){
@@ -84,7 +86,7 @@ function deleteTask(element){
 
 function deleteEventClick(button){
     button.addEventListener('click', () => {
-        const li = button.parentElement;
+        const li = button.parentElement.parentElement;
         deleteTask(li);
         totalTasks();   
     })
@@ -103,7 +105,9 @@ function renderTasks() {
 
     const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(taskBoxes, state.selectedFilter);
-}
+
+    taskBoxes.forEach(box => applyCursorEvents(box));
+};
 
 function taskCheckEvent(input){
     input.addEventListener('change', () => {

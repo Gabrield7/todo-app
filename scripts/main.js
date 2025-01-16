@@ -1,5 +1,6 @@
 import { createTask, renderTasks, totalTasks, todo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
+import { applyCursorEvents } from './drag.js'
 
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
@@ -63,4 +64,3 @@ applyFilterButton();
 
 window.addEventListener('resize', moveFilterButtons);
 document.addEventListener('DOMContentLoaded', moveFilterButtons);
-

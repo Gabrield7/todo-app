@@ -23,29 +23,22 @@ body{
     align-items: center;
     flex-direction: column;
     gap: 20px;
-    margin-top: 5rem;
     background-image: url('./images/bg-desktop-light.jpg');
     background-color: var(--very-light-grayish-blue);
     background-size: contain;
     background-repeat: no-repeat;
-    height: 100vh;
     transition: .5s;
     max-width: 1440px;
     min-width: 375px;
 }
 
-main{
-    display: flex;
-    flex-direction: column;
-    width: 536px;
-    margin: 0 auto;
-}
 /* HEADER */
 header{
     display: flex;
     justify-content: space-between;
     width: 536px;
     margin: 0 auto;
+    margin-top: 5rem;
 }
 
 .todo-title{
@@ -71,7 +64,6 @@ header{
 .tasks-container{
     box-shadow: 2px 4px 20px var(--very-dark-grayish-blue);
     border-radius: 4px;
-    margin: 0 auto;
     background-color: transparent;
 }
 
@@ -112,17 +104,18 @@ header{
 }
 .task{
     border-bottom: 1px solid rgba(0, 0, 0, .2);
+    cursor: grab;
+    position:absolute;
     padding: 16px;
 }
-.task:first-of-type{
+/* .task:first-of-type, .task-box:first-of-type{
     border-radius: 4px 4px 0 0;
-}
+} */
 
 .task-box{
     background: transparent;
     width: 536px;
     min-height: 64px;
-    box-sizing: border-box; 
 }
 
 .task-exclude{
@@ -242,7 +235,11 @@ input[type='checkbox']:checked + .custom-checkbox::after{
 footer{
     font-family: var(--main-font);
     color: var(--dark-grayish-blue);
-    margin-top: 2rem;
+    text-align: center;
+    width: 536px;
+    margin: 1.5rem auto;
+    /* margin-top: 2rem; */
+    
 }
 
 /* DARK THEME */
@@ -289,12 +286,12 @@ body.dark .custom-checkbox:hover{
         background-image: url('./images/bg-mobile-light.jpg');
     }
 
-    main, header, .add-task, .task, .task-filters, .filter-buttons__mobile, .tasks-container{
+    header, .add-task, .task, .task-filters, .filter-buttons__mobile, .tasks-container{
         max-width: 536px;
         min-width: 335px;
     }
 
-    main, header{
+    header{
         width: calc(100% - 80px);
     }
     header{
