@@ -1,6 +1,29 @@
+import { getTodo, renderTasks } from './tasks.js'
+
 const container = document.querySelector('.container');
-const boxes = Array.from(document.querySelectorAll('.task-box'));
-const allItems = Array.from(document.getElementsByClassName('task'));
+//const boxes = Array.from(document.querySelectorAll('.task-box'));
+//const allItems = Array.from(document.getElementsByClassName('task'));
+// todo()
+//const allItems = getTodo().tasks;
+// console.log(boxes);
+
+// async function init() {
+//     const boxes = await renderTasks(); // Espera até que as tarefas sejam renderizadas
+
+//     // Agora você pode acessar os elementos após a renderização
+//     //const boxes = Array.from(document.querySelectorAll('.task-box'));
+//     console.log(boxes); // Agora deve retornar os elementos HTML
+//     //boxes.forEach(box => applyCursorEvents(box));
+//     //return boxes
+// }
+// init();
+//console.log(allItems);
+
+
+// setTimeout(()=>{
+//     const boxes = Array.from(document.querySelectorAll('.task-box'));
+//     console.log(boxes);
+// }, 100);
 
 let element = {
     target: null,
@@ -185,8 +208,8 @@ function followCursor(target) {
     setElementPosition(element.target, { left, top });
     //console.log('left', left);
     //console.log('top', top);
-    console.log('left', rect(element.target).left);
-    console.log('top', rect(element.target).top);
+    // console.log('left', rect(element.target).left);
+    // console.log('top', rect(element.target).top);
     // console.log('left', element.target.style.left);
     // console.log('top', element.target.style.top);
 };
@@ -202,7 +225,41 @@ function followCursor(target) {
 //     });
 // });
 
-function applyCursorEvents(box){
+function backToPosition(item, allItems) {   
+    const boxItem = item.parentElement;
+    
+    if (!item.style.transition){
+        item.style.transition = 'all 1s ease-in-out';
+    };
+
+    //Estilos
+    requestAnimationFrame(() => {
+        setElementPosition(item, { positionCallback: boxPosition, referenceItem: boxItem });
+    });
+
+    allItems.forEach(element => {
+        element.style.opacity = 1;
+
+        if (boxPosition(element.parentElement) !== boxPosition(element)){
+            setElementPosition(element, { positionCallback: boxPosition, referenceItem: element.parentElement });
+        };
+    });
+
+    item.style.zIndex = 0;
+    
+    setTimeout(() => {
+        allItems.forEach(element => {
+            if(element.style.transition) element.style.transition = '';
+        });
+
+        element.locked = false;
+    }, 1000);
+
+    //element.target.removeAttribute('outlist');
+    element.target = null;
+};
+
+function applyCursorEvents(box, allItems){
     const item = box.querySelectorAll('.task')[0];
     const boxRect = rect(box);
 
@@ -219,14 +276,15 @@ function applyCursorEvents(box){
                 element.target = e.target; //Seleciona o elemento
 
                 //console.log(rect(element.target));
+                console.log(allItems);
                 
                 allItems.forEach(task => {
                     if (element.target) {
                         if (task !== element.target && !task.style.transition) {
-                                task.style.transition = 'all .5s ease-in-out';
+                            task.style.transition = 'all .5s ease-in-out';
                         };
-                        task.style.opacity = task === element.target ? 1 : 0.5;
-                        task.style.zIndex = task === element.target ? 1 : 0;
+                        task.style.opacity = task === element.target? 1 : 0.5;
+                        task.style.zIndex = task === element.target? 1 : 0;
                     } 
                 });
                 
@@ -280,7 +338,7 @@ function applyCursorEvents(box){
         //     if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping');
         // });
 
-        //if (element.target === item) backToPosition(item);
+        if (element.target === item) backToPosition(item, allItems);
     });
 
     item.addEventListener('mouseleave', () => {    
@@ -290,15 +348,15 @@ function applyCursorEvents(box){
         //     if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping')
         // });         
 
-        //if (!cursorGlobalState.mouseDown && element.target === item) backToPosition(item);
+        if (!cursorGlobalState.mouseDown && element.target === item) backToPosition(item, allItems);
     });
     //Ajusta a posição do item quando a viewport é alterada
-    // window.addEventListener('resize', () => {
-    //     box.setAttribute('x', rect(box).left);
-    //     box.setAttribute('y', rect(box).top);
+    window.addEventListener('resize', () => {
+        box.setAttribute('x', rect(box).left);
+        box.setAttribute('y', rect(box).top);
 
-    //     setElementPosition(item, { positionCallback: rect, referenceItem: box })
-    // });
+        setElementPosition(item, { positionCallback: rect, referenceItem: box })
+    });
 };
 
 export {applyCursorEvents}

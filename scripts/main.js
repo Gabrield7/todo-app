@@ -1,7 +1,8 @@
-import { createTask, renderTasks, totalTasks, todo } from "./tasks.js";
+import { createTask, renderTasks, totalTasks, getTodo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
 import { applyCursorEvents } from './drag.js'
 
+const todo = getTodo();
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
@@ -58,7 +59,21 @@ theme.addEventListener('click', (e) => {
 });
 
 //RENDERER CONTENT
-renderTasks();
+async function init() {
+    const boxes = Array.from(await renderTasks()); // Espera até que as tarefas sejam renderizadas
+    //console.log(boxes);
+    
+    const allItems = boxes.map(box => box.querySelector('.task'))
+    //console.log(allItems);
+    
+    // Agora você pode acessar os elementos após a renderização
+    //const boxes = Array.from(document.querySelectorAll('.task-box'));
+    //console.log(boxes); // Agora deve retornar os elementos HTML
+    boxes.forEach(box => applyCursorEvents(box, allItems));
+}
+init();
+
+//renderTasks();
 totalTasks();
 applyFilterButton();
 

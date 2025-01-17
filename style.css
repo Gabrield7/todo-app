@@ -105,7 +105,7 @@ header{
 .task{
     border-bottom: 1px solid rgba(0, 0, 0, .2);
     cursor: grab;
-    position:absolute;
+    position: absolute;
     padding: 16px;
 }
 /* .task:first-of-type, .task-box:first-of-type{

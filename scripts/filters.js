@@ -1,4 +1,4 @@
-import { todo, deleteTask } from "./tasks.js";
+import { getTodo, deleteTask } from "./tasks.js";
 
 const tasksList = document.querySelector('.list-tasks');
 const filterButtons = document.querySelectorAll('.filter-buttons > button');
@@ -39,6 +39,8 @@ function displayElement(list, filterBtn){
 };
 
 function applyFilter(filterBtn){
+    const todo = getTodo();
+    
     filterBtn.addEventListener('click', () => {
         const taskBoxes = tasksList.querySelectorAll('.task-box');
         //taskBoxes.forEach(element => displayElement(element, state.selectedFilter));

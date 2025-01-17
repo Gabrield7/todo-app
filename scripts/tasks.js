@@ -5,14 +5,20 @@ import { applyCursorEvents } from './drag.js';
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
 
-const initialTodo = {
-    tasks: [],
-    theme: 'light',
-    filter: state.selectedFilter || 'All'
-};
-const todo = JSON.parse(localStorage.getItem('todo')) || initialTodo;
+//const todo = JSON.parse(localStorage.getItem('todo')) || initialtodo;
+
+function getTodo(){
+    const initialTodo = {
+        tasks: [],
+        theme: 'light',
+        filter: state.selectedFilter || 'All'
+    };
+
+    return JSON.parse(localStorage.getItem('todo')) || initialTodo;
+}
 
 function updateTaskList(task){
+    const todo = getTodo();
     todo.tasks.push(task); //adds the new task to the 'tasks' array
     localStorage.setItem('todo', JSON.stringify(todo)); //updates the task list in the localStorage
     totalTasks();
@@ -41,12 +47,13 @@ function createTaskElement(taskID, taskDescription){
     const deleteButton = taskElement.querySelector('.task-exclude');
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
 
-    applyCursorEvents(taskBox);
+    //applyCursorEvents(taskBox);
     //initializeDragAndDrop();
     return taskElement;
 }
 
 function createTask(){
+    const todo = getTodo();
     const taskIdArray = todo.tasks.map((_, index) => index);
     const taskID = taskIdArray.length > 0? Math.max(...taskIdArray)+1 : 0; //gets the max task number saved in localStorage
     
@@ -69,6 +76,7 @@ function createTask(){
 function deleteTask(element){
     element.remove();
 
+    const todo = getTodo();
     const taskID = element.querySelector('input').id;
     const taskNumber = Number(taskID.split('-')[1]);
     
@@ -92,24 +100,27 @@ function deleteEventClick(button){
     })
 };
 
-function renderTasks() {
+async function renderTasks() {
+    const todo = getTodo();
     if(todo.tasks.length === 0) return;
 
-    todo.tasks.forEach((task, index) =>{
+    await Promise.all(todo.tasks.map((task, index) => {
         const taskElement = createTaskElement(index, task.description); //recreate the tasks when the page is reloaded
 
         const taskInput = taskElement.querySelector('input');
         taskInput.checked = task && task.completed? true:false;
         strikeDescription(taskInput);
-    });
+    }));
 
     const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(taskBoxes, state.selectedFilter);
 
-    taskBoxes.forEach(box => applyCursorEvents(box));
+    return taskBoxes;
+    //taskBoxes.forEach(box => applyCursorEvents(box));
 };
 
 function taskCheckEvent(input){
+    const todo = getTodo();
     input.addEventListener('change', () => {
         const taskID = Number(input.id.split('-')[1]); //task number regitered in DOM
         const taskIndex = todo.tasks.findIndex((_, index) => index === taskID);
@@ -138,6 +149,7 @@ function strikeDescription(input){ //Adds an 'strike' effect to content tasks ma
 }
 
 function totalTasks(){ //Shows (and update) how many tasks left to complete
+    const todo = getTodo();
     const tasks = todo.tasks;
     const taskFilters = document.querySelector('.task-filters span');
 
@@ -145,4 +157,4 @@ function totalTasks(){ //Shows (and update) how many tasks left to complete
     taskFilters.textContent = `${total} items left`;
 }
 
-export {createTask, renderTasks, deleteTask, totalTasks, todo};
+export {createTask, renderTasks, deleteTask, totalTasks, getTodo};
