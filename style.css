@@ -108,8 +108,11 @@ header{
     position: absolute;
     padding: 16px;
 }
-/* .task:first-of-type, .task-box:first-of-type{
+.task-box:first-of-type, .task-box:first-of-type > .task{
     border-radius: 4px 4px 0 0;
+}
+/* .task-box:first-of-type > .task{
+    box-shadow: 2px 0px 20px var(--very-dark-grayish-blue);
 } */
 
 .task-box{
@@ -200,6 +203,7 @@ input[type='checkbox']:checked + .custom-checkbox::after{
     outline: none;
     background: transparent;
     text-decoration: none;
+    user-select: none;
 }
 /* FILTERS */
 .task-filters{

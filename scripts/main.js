@@ -6,6 +6,10 @@ const todo = getTodo();
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
+//const boxes = Array.from(document.getElementsByClassName('task-box'));
+const boxes = () => {
+    return Array.from(document.getElementsByClassName('task-box'));
+}
 
 //TASKS 
 addTaskInput.addEventListener('keydown', (e) => {
@@ -60,16 +64,13 @@ theme.addEventListener('click', (e) => {
 
 //RENDERER CONTENT
 async function init() {
-    const boxes = Array.from(await renderTasks()); // Espera até que as tarefas sejam renderizadas
-    //console.log(boxes);
+    const renderedTasks = Array.from(await renderTasks());
+    if (!renderedTasks || renderedTasks.length === 0) return;
+    //console.log(renderedTasks );
     
-    const allItems = boxes.map(box => box.querySelector('.task'))
-    //console.log(allItems);
-    
-    // Agora você pode acessar os elementos após a renderização
-    //const boxes = Array.from(document.querySelectorAll('.task-box'));
-    //console.log(boxes); // Agora deve retornar os elementos HTML
-    boxes.forEach(box => applyCursorEvents(box, allItems));
+    //const allItems = renderedTasks.map(box => box.querySelector('.task')); 
+
+    boxes().forEach(box => applyCursorEvents(box, boxes()));
 }
 init();
 

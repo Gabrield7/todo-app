@@ -1,4 +1,3 @@
-import { initializeDragAndDrop } from './dragAndDrop.js';
 import { state, filterButtons, displayElement } from './filters.js';
 import { applyCursorEvents } from './drag.js';
 
@@ -116,7 +115,6 @@ async function renderTasks() {
     displayElement(taskBoxes, state.selectedFilter);
 
     return taskBoxes;
-    //taskBoxes.forEach(box => applyCursorEvents(box));
 };
 
 function taskCheckEvent(input){

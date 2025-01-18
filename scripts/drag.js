@@ -1,29 +1,16 @@
-import { getTodo, renderTasks } from './tasks.js'
+//import { getTodo, renderTasks } from './tasks.js'
+import { treatOverlapping, reorderItens } from './overlap.js'
 
-const container = document.querySelector('.container');
-//const boxes = Array.from(document.querySelectorAll('.task-box'));
-//const allItems = Array.from(document.getElementsByClassName('task'));
-// todo()
-//const allItems = getTodo().tasks;
-// console.log(boxes);
+//const container = document.querySelector('.container');
+const taskList = document.getElementsByClassName('list-tasks');
+//const boxes = Array.from(document.getElementsByClassName('task-box'));
+//const tasks = Array.from(boxes).map(box => box.getElementsByClassName('task'));
 
-// async function init() {
-//     const boxes = await renderTasks(); // Espera até que as tarefas sejam renderizadas
+const allItems = () => {
+    const boxe =  Array.from(document.getElementsByClassName('task-box'));
 
-//     // Agora você pode acessar os elementos após a renderização
-//     //const boxes = Array.from(document.querySelectorAll('.task-box'));
-//     console.log(boxes); // Agora deve retornar os elementos HTML
-//     //boxes.forEach(box => applyCursorEvents(box));
-//     //return boxes
-// }
-// init();
-//console.log(allItems);
-
-
-// setTimeout(()=>{
-//     const boxes = Array.from(document.querySelectorAll('.task-box'));
-//     console.log(boxes);
-// }, 100);
+    return boxe.map(box => box.querySelector('.task'));
+}
 
 let element = {
     target: null,
@@ -76,6 +63,10 @@ const cursorGlobalState = (() => {
     };
     // Atualiza as coordenadas do cursor globalmente
     window.addEventListener('mousemove', (e) => {
+        console.log(allItems());
+        // console.log(boxes);
+        //console.log(tasks);
+        
         cursorPosition.lastX = cursorPosition.x;
         cursorPosition.lastY = cursorPosition.y;
 
@@ -84,9 +75,9 @@ const cursorGlobalState = (() => {
         
         if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
 
-        // if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight) { //Controle das bordas da janela do navegador
-        //     if(element.target) backToPosition(element.target);
-        // }
+        if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight) { //Controle das bordas da janela do navegador
+            if(element.target) backToPosition(element.target);
+        }
     });
     // Detecta quando o botão do mouse é pressionado
     window.addEventListener('mousedown', () => {
@@ -203,27 +194,8 @@ function followCursor(target) {
         // };
     //};
     
-    // element.target.style.left = '80px'
-    // element.target.style.top = '80px'
     setElementPosition(element.target, { left, top });
-    //console.log('left', left);
-    //console.log('top', top);
-    // console.log('left', rect(element.target).left);
-    // console.log('top', rect(element.target).top);
-    // console.log('left', element.target.style.left);
-    // console.log('top', element.target.style.top);
 };
-
-// boxes.forEach(box => {
-//     const boxItem = box.querySelectorAll('.task');
-//     const boxRect = rect(box);
-
-//     box.setAttribute('x', boxRect.left);
-//     box.setAttribute('y', boxRect.top);
-//     boxItem.forEach(item => {
-        
-//     });
-// });
 
 function backToPosition(item, allItems) {   
     const boxItem = item.parentElement;
@@ -255,28 +227,31 @@ function backToPosition(item, allItems) {
         element.locked = false;
     }, 1000);
 
-    //element.target.removeAttribute('outlist');
+    element.target.removeAttribute('outlist');
     element.target = null;
 };
 
-function applyCursorEvents(box, allItems){
+function applyCursorEvents(box, boxes){
     const item = box.querySelectorAll('.task')[0];
+    const allItems = boxes.map(box => box.querySelector('.task'));
+    //console.log("allItems", allItems);
+    //console.log("boxes", boxes);
+     
     const boxRect = rect(box);
 
     box.setAttribute('x', boxRect.left);
     box.setAttribute('y', boxRect.top);
-    // console.log(boxRect.left);
-    // console.log(boxRect.top);
     
     setElementPosition(item, { left: boxRect.left, top: boxRect.top });//Salva a posição dos itens como atributo html
 
     item.addEventListener('mousedown', e => {
         cursorGlobalState.mouseDownTime = setTimeout(() => {
             if (!element.locked){
-                element.target = e.target; //Seleciona o elemento
+                const excludedSelectors = ['input', 'label', 'button'];
 
-                //console.log(rect(element.target));
-                console.log(allItems);
+                if (excludedSelectors.some(selector => e.target.matches(selector))) return;
+                
+                element.target = e.target.closest('.task'); //Selects the element
                 
                 allItems.forEach(task => {
                     if (element.target) {
@@ -294,34 +269,23 @@ function applyCursorEvents(box, allItems){
                     //element.locked = true;
                 };
 
-                //console.log('left', rect(element.target).left);
-                //console.log('top', rect(element.target).top);
             };
         }, 250);
     });
     
     item.addEventListener('mousemove', () => {
         if (element.target) { //!cursorGlobalState.throttled && 
-            // console.log('left', rect(element.target).left);
-            // console.log('top', rect(element.target).top);
-            // console.log('left', element.target.style.left);
-            // console.log('top', element.target.style.top);
-
-            // console.log('offsetX', cursorGlobalState.x - rect(element.target).left);
-            // console.log('offsetY', cursorGlobalState.y - rect(element.target).top);
 
             if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
                 element.offsetY = cursorGlobalState.y - rect(element.target).top;
                 element.offsetX = cursorGlobalState.x - rect(element.target).left;
-                // console.log('offsetX', element.offsetX);
-                // console.log('offsetY', element.offsetY);
                 element.locked = true;
             }
 
-            // requestAnimationFrame(() => {
-            //     treatOverlapping();
-            //     reorderItens();
-            // })
+            requestAnimationFrame(() => {
+                treatOverlapping(boxes);
+                reorderItens(boxes);
+            })
 
             // cursorGlobalState.throttled = true;
 
@@ -334,9 +298,9 @@ function applyCursorEvents(box, allItems){
     item.addEventListener('mouseup', () => {
         clearTimeout(cursorGlobalState.mouseDownTime);
 
-        // allItems.forEach(task => {
-        //     if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping');
-        // });
+        allItems.forEach(task => {
+            if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping');
+        });
 
         if (element.target === item) backToPosition(item, allItems);
     });
@@ -344,13 +308,13 @@ function applyCursorEvents(box, allItems){
     item.addEventListener('mouseleave', () => {    
         clearTimeout(cursorGlobalState.mouseDownTime);
         
-        // allItems.forEach(task => {
-        //     if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping')
-        // });         
+        allItems.forEach(task => {
+            if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping')
+        });         
 
         if (!cursorGlobalState.mouseDown && element.target === item) backToPosition(item, allItems);
     });
-    //Ajusta a posição do item quando a viewport é alterada
+    //Adjust the task element position when the viewport is rezided
     window.addEventListener('resize', () => {
         box.setAttribute('x', rect(box).left);
         box.setAttribute('y', rect(box).top);
@@ -359,4 +323,4 @@ function applyCursorEvents(box, allItems){
     });
 };
 
-export {applyCursorEvents}
+export {element, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents}
