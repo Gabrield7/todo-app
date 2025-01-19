@@ -114,10 +114,11 @@ function findDraggedIndex (target, boxes, overlapItems, targetBox) {
 
     if (overlapItems.length > 1) {
         const largestOverlap = getMaxOverlapItem(target, overlapItems);
-        return boxes.findIndex(box => box.querySelector('.item') === largestOverlap);
+
+        return boxes.findIndex(box => box.querySelector('.task') === largestOverlap);
     } else if (overlapItems.length === 1) {
         const largestOverlap = getMaxOverlapItem(target, [...overlapItems, targetBox]);
-        return largestOverlap === targetBox ? null : boxes.findIndex(box => box.querySelector('.item') === largestOverlap);
+        return largestOverlap === targetBox ? null : boxes.findIndex(box => box.querySelector('.task') === largestOverlap);
     }
 
     return boxes.findIndex(box => overlappingStatus(element.target, box, 1, 1));
@@ -158,30 +159,25 @@ function reorderItens(boxes){
     const isOutList = element.target.hasAttribute('outlist'); //Checks if the target isn't overlapping other elements in the list
     const items = boxes.map(box => box.querySelector('.task'));
     const targetBox = boxes.find(box => box.contains(element.target));
-    const targetBoxOverlap = !!overlappingStatus(element.target, targetBox, 1, 1); // chekcs if the target isn't overlapping its own 'box'
-    //console.log('items', targetBox);
-    //console.log('targetBox', targetBox);
-    // overlapItems = items.forEach((item) => {
-    //     console.log(item)
-    // });
+    const targetBoxOverlap = !!overlappingStatus(element.target, targetBox, 1, 1); // checks if the target isn't overlapping its own 'box'
 
     const overlapAnyBox = boxes.some(box => overlappingStatus(element.target, box, 1, 1));    
     const overlapItems = items.filter(item => item !== element.target && overlappingStatus(element.target, item, 1, 1));
 
-    if(!overlapAnyBox && !isOutList){ //Item se move de 'dentro' da lista para 'fora'
+    if(!overlapAnyBox && !isOutList){ //Item moves from 'inside' the list to 'outside' of it
         element.target.setAttribute('outlist','');
         const draggedItemIndex = boxes.findIndex(box => box.contains(element.target));
 
         moveItem(element.target, items, boxes, draggedItemIndex, -1);
     };
-    if (overlapAnyBox && isOutList){ //Item se move de 'fora' da lista para 'dentro'
+    if (overlapAnyBox && isOutList){ //Item moves from 'outside' the list to 'inside' of it
         element.target.removeAttribute('outlist');
-        const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);
+        const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);  
 
         if (!draggedItemIndex) return;
         moveItem(element.target, items, boxes, draggedItemIndex, 1);
     };
-    if(overlapAnyBox && !isOutList && !targetBoxOverlap){ //Item se move 'dentro' da lista
+    if(overlapAnyBox && !isOutList && !targetBoxOverlap){ //Item moves 'inside' the list
         element.target.removeAttribute('outlist');
         const initialTargetIndex = boxes.findIndex(box => box.contains(element.target));
         const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);

@@ -52,7 +52,7 @@ function updateTheme(theme) {
     localStorage.setItem('todo', JSON.stringify(todo));
 }
 
-// Initialize the tem when the pages reload
+// Initialize the item when the pages reload
 updateTheme(todo.theme || 'light');
 
 // Switches the theme when click the 'theme' button
@@ -64,11 +64,21 @@ theme.addEventListener('click', (e) => {
 
 //RENDERER CONTENT
 async function init() {
-    const renderedTasks = Array.from(await renderTasks());
+    //console.log(await renderTasks());
+    
+    const renderedTasks = await renderTasks();
     if (!renderedTasks || renderedTasks.length === 0) return;
     //console.log(renderedTasks );
     
     //const allItems = renderedTasks.map(box => box.querySelector('.task')); 
+    renderedTasks.forEach(box => {
+        const item = box.getElementsByClassName('task');
+        //console.log(item);
+        
+        //console.log('box', box.style.left)//.getBoundingClientRect().left)//.getBoundingClientRect().left);
+        //console.log('item', item[0].style.left)//.getBoundingClientRect().left);
+        
+    });
 
     boxes().forEach(box => applyCursorEvents(box, boxes()));
 }

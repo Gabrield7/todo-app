@@ -1,10 +1,10 @@
 import { state, filterButtons, displayElement } from './filters.js';
-import { applyCursorEvents } from './drag.js';
+import { applyCursorEvents, rect, boxPosition, setElementPosition, element } from './drag.js';
 
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
 
-//const todo = JSON.parse(localStorage.getItem('todo')) || initialtodo;
+const boxes = () => Array.from(document.getElementsByClassName('task-box'));
 
 function getTodo(){
     const initialTodo = {
@@ -46,23 +46,39 @@ function createTaskElement(taskID, taskDescription){
     const deleteButton = taskElement.querySelector('.task-exclude');
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
 
-    //applyCursorEvents(taskBox);
-    //initializeDragAndDrop();
-    return taskElement;
-}
+    return {
+        element: taskElement,
+        box: taskBox
+    };
+};
 
 function createTask(){
     const todo = getTodo();
-    const taskIdArray = todo.tasks.map((_, index) => index);
-    const taskID = taskIdArray.length > 0? Math.max(...taskIdArray)+1 : 0; //gets the max task number saved in localStorage
-    
+    const taskIdArray = todo.tasks.map(task => task.id);
+
+    function generateID(tasks) {
+        const reorderIds = tasks.slice().sort((a, b) => a - b);
+
+        const id = reorderIds.findIndex((id, index) => id !== index);
+        const taskID = id !== -1 ? id : reorderIds.length;
+
+        return taskID;
+    };
+
+    const taskID = generateID(taskIdArray);
+    //console.log('taskIdArray', taskIdArray);
+    //console.log('next id', taskID);
+
+    //const taskID = taskIdArray.length > 0? Math.max(...taskIdArray)+1 : 0;
+    let taskBox = null;
     if(addTaskInput.value !== ''){
         const task = {
+            "id": taskID,
             "description": addTaskInput.value,
             "completed": false
         };
     
-        createTaskElement(taskID, task.description);
+        taskBox = createTaskElement(taskID, task.description).box;
         addTaskInput.value = '';
     
         updateTaskList(task);
@@ -70,6 +86,8 @@ function createTask(){
         const taskBoxes = tasksList.querySelectorAll('.task-box');
         displayElement(taskBoxes, state.selectedFilter);
     };
+    
+    applyCursorEvents(taskBox, boxes());
 };
 
 function deleteTask(element){
@@ -78,8 +96,9 @@ function deleteTask(element){
     const todo = getTodo();
     const taskID = element.querySelector('input').id;
     const taskNumber = Number(taskID.split('-')[1]);
-    
-    todo.tasks.splice(taskNumber, 1); //Removes que selected task
+
+    const index = todo.tasks.findIndex(task => task.id === taskNumber);
+    if(index !== -1) todo.tasks.splice(index, 1);
     
     localStorage.setItem('todo', JSON.stringify(todo));
     
@@ -89,14 +108,25 @@ function deleteTask(element){
             button.style.color = 'var(--dark-grayish-blue)';
         });
     };
-}
+
+    //console.log('box', element.parentElement.left);
+    //console.log('item', element.left);
+    //setElementPosition(element, { positionCallback: rect, referenceItem: element.parentElement });
+
+    // boxes().forEach(box => {
+    //     const item = box.querySelector('.task')
+
+    //     console.log('box', rect(box).left);
+    //     console.log('item', rect(item).left);
+    // });
+};
 
 function deleteEventClick(button){
     button.addEventListener('click', () => {
         const li = button.parentElement.parentElement;
         deleteTask(li);
         totalTasks();   
-    })
+    });
 };
 
 async function renderTasks() {
@@ -104,16 +134,27 @@ async function renderTasks() {
     if(todo.tasks.length === 0) return;
 
     await Promise.all(todo.tasks.map((task, index) => {
-        const taskElement = createTaskElement(index, task.description); //recreate the tasks when the page is reloaded
+        const taskElement = createTaskElement(index, task.description).element; //recreate the tasks when the page is reloaded
 
         const taskInput = taskElement.querySelector('input');
         taskInput.checked = task && task.completed? true:false;
         strikeDescription(taskInput);
+
+        if (boxPosition(taskElement.parentElement) !== boxPosition(taskElement)){
+            //console.log('repositioned');
+            taskElement.parentElement.setAttribute('x', rect(taskElement.parentElement).left);
+            taskElement.parentElement.setAttribute('y', rect(taskElement.parentElement).top);
+
+            //setElementPosition(item, { positionCallback: rect, referenceItem: box });
+            setElementPosition(taskElement, { positionCallback: boxPosition, referenceItem: taskElement });
+        };
+        //setElementPosition(taskElement, { positionCallback: rect, referenceItem: taskElement.parentElement });
     }));
 
     const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(taskBoxes, state.selectedFilter);
 
+    //setElementPosition(item, { positionCallback: rect, referenceItem: box });
     return taskBoxes;
 };
 

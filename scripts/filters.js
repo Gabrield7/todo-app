@@ -18,7 +18,6 @@ function restoreButtonStyle(btn){
 };
 
 function displayElement(list, filterBtn){
-    
     list.forEach(element => {
         //console.log('display');
         //console.log(element);

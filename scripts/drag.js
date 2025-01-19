@@ -63,7 +63,7 @@ const cursorGlobalState = (() => {
     };
     // Atualiza as coordenadas do cursor globalmente
     window.addEventListener('mousemove', (e) => {
-        console.log(allItems());
+        //console.log(allItems());
         // console.log(boxes);
         //console.log(tasks);
         
@@ -241,8 +241,14 @@ function applyCursorEvents(box, boxes){
 
     box.setAttribute('x', boxRect.left);
     box.setAttribute('y', boxRect.top);
+
+    //console.log('Box top', boxRect.top);
+    //console.log('Item left', item.style.left);
     
-    setElementPosition(item, { left: boxRect.left, top: boxRect.top });//Salva a posição dos itens como atributo html
+    //setElementPosition(item, { positionCallback: rect, referenceItem: box });
+    //setElementPosition(item, { left: boxRect.left, top: boxRect.top });//Saves the items position as a HTML attribute
+    //console.log('Box left', boxRect.left);
+    //console.log('Item left', item.style.left);
 
     item.addEventListener('mousedown', e => {
         cursorGlobalState.mouseDownTime = setTimeout(() => {
@@ -268,7 +274,7 @@ function applyCursorEvents(box, boxes){
                     element.offsetY = cursorGlobalState.y - rect(element.target).top;
                     //element.locked = true;
                 };
-
+                console.log(allItems);
             };
         }, 250);
     });
@@ -319,7 +325,7 @@ function applyCursorEvents(box, boxes){
         box.setAttribute('x', rect(box).left);
         box.setAttribute('y', rect(box).top);
 
-        setElementPosition(item, { positionCallback: rect, referenceItem: box })
+        setElementPosition(item, { positionCallback: rect, referenceItem: box });
     });
 };
 
