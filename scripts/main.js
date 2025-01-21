@@ -1,7 +1,8 @@
 import { createTask, renderTasks, totalTasks, getTodo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
-import { applyCursorEvents } from './drag.js'
+import { applyCursorEvents, rect } from './drag.js'
 
+//const height = document.body.offsetHeight;
 const todo = getTodo();
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
@@ -72,15 +73,19 @@ async function init() {
     
     //const allItems = renderedTasks.map(box => box.querySelector('.task')); 
     renderedTasks.forEach(box => {
-        const item = box.getElementsByClassName('task');
-        //console.log(item);
+        const item = box.getElementsByClassName('task')[0];
+        
+        // console.log(box);
+        // console.log('item', rect(item).left);
+        // console.log('box', rect(box).left);
         
         //console.log('box', box.style.left)//.getBoundingClientRect().left)//.getBoundingClientRect().left);
         //console.log('item', item[0].style.left)//.getBoundingClientRect().left);
         
     });
 
-    boxes().forEach(box => applyCursorEvents(box, boxes()));
+    //boxes().forEach(box => applyCursorEvents(box, boxes()));
+    Array.from(renderedTasks).forEach(box => applyCursorEvents(box, Array.from(renderedTasks)));
 }
 init();
 

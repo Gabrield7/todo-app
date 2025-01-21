@@ -53,6 +53,7 @@ function createTaskElement(taskID, taskDescription){
 };
 
 function createTask(){
+    if(addTaskInput.value === '') return;
     const todo = getTodo();
     const taskIdArray = todo.tasks.map(task => task.id);
 
@@ -66,28 +67,29 @@ function createTask(){
     };
 
     const taskID = generateID(taskIdArray);
-    //console.log('taskIdArray', taskIdArray);
-    //console.log('next id', taskID);
-
     //const taskID = taskIdArray.length > 0? Math.max(...taskIdArray)+1 : 0;
     let taskBox = null;
-    if(addTaskInput.value !== ''){
-        const task = {
-            "id": taskID,
-            "description": addTaskInput.value,
-            "completed": false
-        };
-    
-        taskBox = createTaskElement(taskID, task.description).box;
-        addTaskInput.value = '';
-    
-        updateTaskList(task);
-
-        const taskBoxes = tasksList.querySelectorAll('.task-box');
-        displayElement(taskBoxes, state.selectedFilter);
+    const task = {
+        "id": taskID,
+        "description": addTaskInput.value,
+        "completed": false
     };
+
+    taskBox = createTaskElement(taskID, task.description).box;
+    addTaskInput.value = '';
+
+    updateTaskList(task);
+    //Shows the task element
+    const taskBoxes = tasksList.querySelectorAll('.task-box');
+    displayElement(taskBoxes, state.selectedFilter);
     
     applyCursorEvents(taskBox, boxes());
+
+    boxes().forEach(box => { //Readjustment of the 'element' position in relation to the 'box' position
+        const item = box.querySelector('.task');
+
+        setElementPosition(item, { positionCallback: rect, referenceItem: box });
+    });
 };
 
 function deleteTask(element){
@@ -102,23 +104,20 @@ function deleteTask(element){
     
     localStorage.setItem('todo', JSON.stringify(todo));
     
-    //Restore the 'filter' button style
-    if(tasksList.childElementCount === 0){
+    if(tasksList.childElementCount === 0){ //Restore the 'filter' button style
         filterButtons.forEach(button => {
             button.style.color = 'var(--dark-grayish-blue)';
         });
     };
 
-    //console.log('box', element.parentElement.left);
-    //console.log('item', element.left);
-    //setElementPosition(element, { positionCallback: rect, referenceItem: element.parentElement });
+    boxes().forEach(box => { //Readjustment of the 'element' position in relation to the 'box' position
+        const item = box.querySelector('.task');
 
-    // boxes().forEach(box => {
-    //     const item = box.querySelector('.task')
+        box.setAttribute('x', rect(box).left);
+        box.setAttribute('y', rect(box).top);
 
-    //     console.log('box', rect(box).left);
-    //     console.log('item', rect(item).left);
-    // });
+        setElementPosition(item, { positionCallback: rect, referenceItem: box });
+    });
 };
 
 function deleteEventClick(button){
@@ -145,23 +144,20 @@ async function renderTasks() {
             taskElement.parentElement.setAttribute('x', rect(taskElement.parentElement).left);
             taskElement.parentElement.setAttribute('y', rect(taskElement.parentElement).top);
 
-            //setElementPosition(item, { positionCallback: rect, referenceItem: box });
             setElementPosition(taskElement, { positionCallback: boxPosition, referenceItem: taskElement });
         };
-        //setElementPosition(taskElement, { positionCallback: rect, referenceItem: taskElement.parentElement });
     }));
 
     const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(taskBoxes, state.selectedFilter);
 
-    //setElementPosition(item, { positionCallback: rect, referenceItem: box });
     return taskBoxes;
 };
 
 function taskCheckEvent(input){
     const todo = getTodo();
     input.addEventListener('change', () => {
-        const taskID = Number(input.id.split('-')[1]); //task number regitered in DOM
+        const taskID = Number(input.id.split('-')[1]); //Task number regitered in DOM
         const taskIndex = todo.tasks.findIndex((_, index) => index === taskID);
         
         todo.tasks[taskIndex].completed = input.checked ? true:false;

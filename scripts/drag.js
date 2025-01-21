@@ -5,11 +5,13 @@ import { treatOverlapping, reorderItens } from './overlap.js'
 const taskList = document.getElementsByClassName('list-tasks');
 //const boxes = Array.from(document.getElementsByClassName('task-box'));
 //const tasks = Array.from(boxes).map(box => box.getElementsByClassName('task'));
-
+const boxes = () => {
+    return Array.from(document.getElementsByClassName('task-box'));
+}
 const allItems = () => {
-    const boxe =  Array.from(document.getElementsByClassName('task-box'));
+    //const boxe =  Array.from(document.getElementsByClassName('task-box'));
 
-    return boxe.map(box => box.querySelector('.task'));
+    return boxes().map(box => box.querySelector('.task'));
 }
 
 let element = {
@@ -62,11 +64,7 @@ const cursorGlobalState = (() => {
         throttled: false //Trava para evitar o registro muito elevado de eventos realizados em 'mousemove'
     };
     // Atualiza as coordenadas do cursor globalmente
-    window.addEventListener('mousemove', (e) => {
-        //console.log(allItems());
-        // console.log(boxes);
-        //console.log(tasks);
-        
+    window.addEventListener('mousemove', (e) => {        
         cursorPosition.lastX = cursorPosition.x;
         cursorPosition.lastY = cursorPosition.y;
 
@@ -107,7 +105,6 @@ function insideItemArea(item, xFactor, yFactor){
 
 function followCursor(target) {    
     if(!element.offsetX || !element.offsetY) return;
-    //console.log('ggg');
     
     const targetRect = rect(target);
     const delta = { //Deslocamento do cursor ao relação a movimentação anterior
@@ -171,15 +168,10 @@ function followCursor(target) {
         //     // Borda inferior
         //     if (targetRect.bottom >= rect(container).bottom) {
         //         top = rect(container).bottom - rect(element.target).height; // Cálculo do 'top' para a borda inferior
-        //         //console.log('top', top);
                 
         //         if (delta.y <= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor 
         //             element.offsetY = cursorGlobalState.lastY - targetRect.top;
         //             top = cursorGlobalState.y - element.offsetY; // Atualiza a posição Y para seguir o cursor
-        //             //console.log('offsetY', element.offsetY);
-                    
-        //             console.log('top', top);
-                    
         //         };
         //     };
         //     // Borda superior
@@ -197,7 +189,7 @@ function followCursor(target) {
     setElementPosition(element.target, { left, top });
 };
 
-function backToPosition(item, allItems) {   
+function backToPosition(item) {   
     const boxItem = item.parentElement;
     
     if (!item.style.transition){
@@ -206,51 +198,56 @@ function backToPosition(item, allItems) {
 
     //Estilos
     requestAnimationFrame(() => {
-        setElementPosition(item, { positionCallback: boxPosition, referenceItem: boxItem });
+        setElementPosition(item, { positionCallback: rect, referenceItem: boxItem });
     });
 
-    allItems.forEach(element => {
-        element.style.opacity = 1;
-
-        if (boxPosition(element.parentElement) !== boxPosition(element)){
-            setElementPosition(element, { positionCallback: boxPosition, referenceItem: element.parentElement });
+    allItems().forEach(task => {
+        task.style.opacity = 1;
+        
+        if (task !== element.target){// && 
+            //(rect(task).top !== rect(task.parentElement).top || rect(task).left !== rect(task.parentElement).left)){
+            //requestAnimationFrame(() => {
+                //setElementPosition(task, { positionCallback: boxPosition, referenceItem: task.parentElement });
+            //});
         };
     });
 
     item.style.zIndex = 0;
     
     setTimeout(() => {
-        allItems.forEach(element => {
+        allItems().forEach(element => {
             if(element.style.transition) element.style.transition = '';
         });
 
         element.locked = false;
+        console.log('box', rect(boxItem).left);
+        console.log('item', rect(item).left);
     }, 1000);
 
     element.target.removeAttribute('outlist');
     element.target = null;
 };
 
-function applyCursorEvents(box, boxes){
+function applyCursorEvents(box, boxe){
     const item = box.querySelectorAll('.task')[0];
-    const allItems = boxes.map(box => box.querySelector('.task'));
-    //console.log("allItems", allItems);
-    //console.log("boxes", boxes);
-     
-    const boxRect = rect(box);
+    //const boxRect = rect(box);
 
-    box.setAttribute('x', boxRect.left);
-    box.setAttribute('y', boxRect.top);
+    box.setAttribute('x', rect(box).left);
+    box.setAttribute('y', rect(box).top);
 
-    //console.log('Box top', boxRect.top);
-    //console.log('Item left', item.style.left);
+    item.setAttribute('x', rect(item).left);
+    item.setAttribute('y', rect(item).top);
     
-    //setElementPosition(item, { positionCallback: rect, referenceItem: box });
-    //setElementPosition(item, { left: boxRect.left, top: boxRect.top });//Saves the items position as a HTML attribute
-    //console.log('Box left', boxRect.left);
-    //console.log('Item left', item.style.left);
+    // console.log(boxPosition(box));
+    // console.log(boxPosition(item));
+    // console.log(boxPosition(box).left === boxPosition(item).left);
+    // console.log(boxPosition(box).top === boxPosition(item).top);
+    requestAnimationFrame(() => { 
+        setElementPosition(item, { positionCallback: rect, referenceItem: box });
+    })
 
     item.addEventListener('mousedown', e => {
+        e.preventDefault();
         cursorGlobalState.mouseDownTime = setTimeout(() => {
             if (!element.locked){
                 const excludedSelectors = ['input', 'label', 'button'];
@@ -259,7 +256,7 @@ function applyCursorEvents(box, boxes){
                 
                 element.target = e.target.closest('.task'); //Selects the element
                 
-                allItems.forEach(task => {
+                allItems().forEach(task => {
                     if (element.target) {
                         if (task !== element.target && !task.style.transition) {
                             task.style.transition = 'all .5s ease-in-out';
@@ -274,7 +271,6 @@ function applyCursorEvents(box, boxes){
                     element.offsetY = cursorGlobalState.y - rect(element.target).top;
                     //element.locked = true;
                 };
-                console.log(allItems);
             };
         }, 250);
     });
@@ -289,8 +285,8 @@ function applyCursorEvents(box, boxes){
             }
 
             requestAnimationFrame(() => {
-                treatOverlapping(boxes);
-                reorderItens(boxes);
+                treatOverlapping(boxes());
+                reorderItens(boxes());
             })
 
             // cursorGlobalState.throttled = true;
@@ -304,24 +300,30 @@ function applyCursorEvents(box, boxes){
     item.addEventListener('mouseup', () => {
         clearTimeout(cursorGlobalState.mouseDownTime);
 
-        allItems.forEach(task => {
+        allItems().forEach(task => {
             if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping');
         });
 
-        if (element.target === item) backToPosition(item, allItems);
+        if(element.target === item) backToPosition(item);
     });
 
     item.addEventListener('mouseleave', () => {    
         clearTimeout(cursorGlobalState.mouseDownTime);
         
-        allItems.forEach(task => {
+        allItems().forEach(task => {
             if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping')
         });         
 
-        if (!cursorGlobalState.mouseDown && element.target === item) backToPosition(item, allItems);
+        if(!cursorGlobalState.mouseDown && element.target === item) backToPosition(item);
     });
+    //console.log('box', rect(box).left);
+    //console.log('item', rect(item).left);
+    
     //Adjust the task element position when the viewport is rezided
     window.addEventListener('resize', () => {
+        //console.log('box', rect(box).left);
+        //console.log('item', rect(item).left);
+
         box.setAttribute('x', rect(box).left);
         box.setAttribute('y', rect(box).top);
 

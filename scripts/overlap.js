@@ -1,7 +1,5 @@
 import { element, boxPosition, rect, setElementPosition, insideItemArea } from "./drag.js";
 
-//const rect = target => target.getBoundingClientRect();
-
 function overlappingStatus (draggedItem, overlappingItem, xFactor, yFactor) {
     const draggedRect = rect(draggedItem);
     const overlapRect = insideItemArea(overlappingItem, xFactor, yFactor);
@@ -28,7 +26,7 @@ let switchThrottle = false;
 function switchItens(draggedItem, overlappingItem) {
     if (switchThrottle) return
       
-    if (!draggedItem || !overlappingItem || !draggedItem.parentElement || !overlappingItem.parentElement) return; // Validação de elementos  
+    if (!draggedItem || !overlappingItem || !draggedItem.parentElement || !overlappingItem.parentElement) return; // Element validation  
     
     const draggedItemBox = draggedItem.parentElement;
     const overlappingItemBox = overlappingItem.parentElement;
@@ -36,7 +34,7 @@ function switchItens(draggedItem, overlappingItem) {
     if (draggedItemBox === overlappingItemBox) return; // Avoid redundant switches
     
     requestAnimationFrame(() => {
-        setElementPosition(overlappingItem, { positionCallback: boxPosition, referenceItem: draggedItemBox });
+        setElementPosition(overlappingItem, { positionCallback: rect, referenceItem: draggedItemBox });
     });
      // Switches elements in DOM
     draggedItemBox.append(overlappingItem);
@@ -68,13 +66,19 @@ function treatOverlapping(boxes){
         const overlapItems = overlappingStatus(element.target, item, 1, 1);
 
         if(item.hasAttribute('overlapping') && switchBack && item === largestOverlapItem){
-            switchItens(element.target, item);
+            //requestAnimationFrame(() => {
+                switchItens(element.target, item);
+            //});
         };
 
         if (overlapItems && !item.hasAttribute('overlapping') && item === largestOverlapItem){
             item.setAttribute('overlapping', '');
             if(!element.target.hasAttribute('outlist') && (index === targetIndices.after || index === targetIndices.before)){   
-                switchItens(element.target, item);
+                //switchItens(element.target, item);
+                //requestAnimationFrame(() => {
+                    switchItens(element.target, item);
+                //});
+
                 switchBack = true;
             }
 
@@ -88,12 +92,9 @@ function treatOverlapping(boxes){
 function getMaxOverlapItem(element, boxes) {
     let maxArea = 0; // Initialize the maxium area as 'zero'
     let largestOverlaps = []; // Initialize the lergest overlap itens list
-    //console.log(boxes);
     
     // Ensures 'box' to be a list, independentemente de ser um único elemento ou uma lista
-    boxes.forEach((box) => {
-        //console.log(box);
-        
+    boxes.forEach((box) => {  
         const area = overlappingStatus(element, box, 1, 1); // Get the overlapping area
 
         if (area > maxArea) { 
@@ -128,19 +129,21 @@ const moveItem = (target, items, boxes, startIndex, direction) => {
     boxes.forEach((box, index) => {
         const item = items[index];
 
-        if (item.style.transition) { //In case the animation get interrupted
-            const computedStyle = window.getComputedStyle(item);
-            const currentLeft = computedStyle.left;
-            const currentTop = computedStyle.top;
-            item.style.transition = 'none';
-            item.style.left = currentLeft;
-            item.style.top = currentTop;
-            void item.offsetWidth;
-            item.style.transition = 'all 0.5s ease-in-out';
-        }
+        // if (item.style.transition) { //In case the animation get interrupted
+        //     const computedStyle = window.getComputedStyle(item);
+        //     const currentLeft = computedStyle.left;
+        //     const currentTop = computedStyle.top;
+        //     item.style.transition = 'none';
+        //     item.style.left = currentLeft;
+        //     item.style.top = currentTop;
+        //     void item.offsetWidth;
+        //     item.style.transition = 'all 0.5s ease-in-out';
+        // }
 
         if (index >= startIndex && item && item !== target) {
             requestAnimationFrame(() => {
+                console.log('here');
+                
                 setElementPosition(item, { positionCallback: boxPosition, referenceItem: boxes[index + direction] });
             });
             boxes[index + direction]?.append(item);
@@ -165,12 +168,15 @@ function reorderItens(boxes){
     const overlapItems = items.filter(item => item !== element.target && overlappingStatus(element.target, item, 1, 1));
 
     if(!overlapAnyBox && !isOutList){ //Item moves from 'inside' the list to 'outside' of it
+        console.log('case 1');
+        
         element.target.setAttribute('outlist','');
         const draggedItemIndex = boxes.findIndex(box => box.contains(element.target));
 
         moveItem(element.target, items, boxes, draggedItemIndex, -1);
     };
     if (overlapAnyBox && isOutList){ //Item moves from 'outside' the list to 'inside' of it
+        console.log('case 2');
         element.target.removeAttribute('outlist');
         const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);  
 
@@ -178,6 +184,7 @@ function reorderItens(boxes){
         moveItem(element.target, items, boxes, draggedItemIndex, 1);
     };
     if(overlapAnyBox && !isOutList && !targetBoxOverlap){ //Item moves 'inside' the list
+        console.log('case 3');
         element.target.removeAttribute('outlist');
         const initialTargetIndex = boxes.findIndex(box => box.contains(element.target));
         const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);
@@ -191,9 +198,10 @@ function reorderItens(boxes){
     };
     
     boxes.forEach((box, index)=> {
-        const item = items[index];
+        const item = box.querySelector('.task')
+        
         if (item !== element.target && boxPosition(box) !== boxPosition(item)){
-            setElementPosition(item, { positionCallback: boxPosition, referenceItem: box });
+            //setElementPosition(item, { positionCallback: boxPosition, referenceItem: box });
         };
     });
 
