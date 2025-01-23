@@ -70,19 +70,6 @@ async function init() {
     const renderedTasks = await renderTasks();
     if (!renderedTasks || renderedTasks.length === 0) return;
     //console.log(renderedTasks );
-    
-    //const allItems = renderedTasks.map(box => box.querySelector('.task')); 
-    renderedTasks.forEach(box => {
-        const item = box.getElementsByClassName('task')[0];
-        
-        // console.log(box);
-        // console.log('item', rect(item).left);
-        // console.log('box', rect(box).left);
-        
-        //console.log('box', box.style.left)//.getBoundingClientRect().left)//.getBoundingClientRect().left);
-        //console.log('item', item[0].style.left)//.getBoundingClientRect().left);
-        
-    });
 
     //boxes().forEach(box => applyCursorEvents(box, boxes()));
     Array.from(renderedTasks).forEach(box => applyCursorEvents(box, Array.from(renderedTasks)));

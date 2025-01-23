@@ -1,5 +1,5 @@
 import { state, filterButtons, displayElement } from './filters.js';
-import { applyCursorEvents, rect, boxPosition, setElementPosition, element } from './drag.js';
+import { applyCursorEvents, rect, boxPosition, setElementPosition } from './drag.js';
 
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
@@ -40,8 +40,8 @@ function createTaskElement(taskID, taskDescription){
     taskBox.appendChild(taskElement);
     tasksList.appendChild(taskBox);
 
-    const input = taskElement.querySelector('input');
-    taskCheckEvent(input);
+    // const input = taskElement.querySelector('input');
+    // taskCheckEvent(input);
 
     const deleteButton = taskElement.querySelector('.task-exclude');
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
@@ -55,37 +55,48 @@ function createTaskElement(taskID, taskDescription){
 function createTask(){
     if(addTaskInput.value === '') return;
     const todo = getTodo();
+    
+    // ID defination
     const taskIdArray = todo.tasks.map(task => task.id);
-
+    //console.log(taskIdArray);
+    
     function generateID(tasks) {
         const reorderIds = tasks.slice().sort((a, b) => a - b);
-
+        
         const id = reorderIds.findIndex((id, index) => id !== index);
         const taskID = id !== -1 ? id : reorderIds.length;
-
+        
         return taskID;
     };
-
+    
     const taskID = generateID(taskIdArray);
-    //const taskID = taskIdArray.length > 0? Math.max(...taskIdArray)+1 : 0;
+
     let taskBox = null;
     const task = {
         "id": taskID,
         "description": addTaskInput.value,
         "completed": false
     };
-
-    taskBox = createTaskElement(taskID, task.description).box;
+    
+    const taskElementCriation = createTaskElement(taskID, task.description);
+    taskBox = taskElementCriation.box;
     addTaskInput.value = '';
 
-    updateTaskList(task);
+    //Update the local Storage
+    updateTaskList(task); 
+
+    //Check task implementation
+    const taskElement = taskElementCriation.element;
+    const input = taskElement.querySelector('input');
+    taskCheckEvent(input);
+
     //Shows the task element
     const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(taskBoxes, state.selectedFilter);
     
     applyCursorEvents(taskBox, boxes());
-
-    boxes().forEach(box => { //Readjustment of the 'element' position in relation to the 'box' position
+    //Readjustment of the 'element' position in relation to the 'box' position
+    boxes().forEach(box => { 
         const item = box.querySelector('.task');
 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
@@ -136,11 +147,12 @@ async function renderTasks() {
         const taskElement = createTaskElement(index, task.description).element; //recreate the tasks when the page is reloaded
 
         const taskInput = taskElement.querySelector('input');
+        taskCheckEvent(taskInput);
+
         taskInput.checked = task && task.completed? true:false;
         strikeDescription(taskInput);
 
         if (boxPosition(taskElement.parentElement) !== boxPosition(taskElement)){
-            //console.log('repositioned');
             taskElement.parentElement.setAttribute('x', rect(taskElement.parentElement).left);
             taskElement.parentElement.setAttribute('y', rect(taskElement.parentElement).top);
 
@@ -155,12 +167,17 @@ async function renderTasks() {
 };
 
 function taskCheckEvent(input){
-    const todo = getTodo();
     input.addEventListener('change', () => {
+        const todo = getTodo();
         const taskID = Number(input.id.split('-')[1]); //Task number regitered in DOM
-        const taskIndex = todo.tasks.findIndex((_, index) => index === taskID);
+        console.log(taskID);
         
+        const taskIndex = todo.tasks.findIndex(task => task.id === taskID);
+        //console.log(todo.tasks);
+        
+        //console.log(todo.tasks[taskIndex]);
         todo.tasks[taskIndex].completed = input.checked ? true:false;
+        //console.log(todo.tasks);
         
         localStorage.setItem('todo', JSON.stringify(todo));
         strikeDescription(input);
@@ -175,8 +192,8 @@ function strikeDescription(input){ //Adds an 'strike' effect to content tasks ma
     const taskDescription = input.parentElement.querySelector('.task-description');
     
     if (!taskDescription.dataset.originalColor) {
-        const originalColor = window.getComputedStyle(taskDescription).getPropertyValue('color'); //gets the propert 'color' regitered in css file
-        taskDescription.dataset.originalColor = originalColor; //save the original color
+        const originalColor = window.getComputedStyle(taskDescription).getPropertyValue('color'); //Gets the propert 'color' regitered in css file
+        taskDescription.dataset.originalColor = originalColor; //Save the original color
     }
     
     taskDescription.style.textDecoration = input.checked ? 'line-through':'none';
@@ -185,10 +202,12 @@ function strikeDescription(input){ //Adds an 'strike' effect to content tasks ma
 
 function totalTasks(){ //Shows (and update) how many tasks left to complete
     const todo = getTodo();
-    const tasks = todo.tasks;
+    //const tasks = todo.tasks;
+    //console.log(todo);
+    
     const taskFilters = document.querySelector('.task-filters span');
 
-    const total = tasks.filter(task => task.completed === false).length;
+    const total = todo.tasks.filter(task => task.completed === false).length;
     taskFilters.textContent = `${total} items left`;
 }
 

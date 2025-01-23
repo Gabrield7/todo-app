@@ -144,7 +144,7 @@ const moveItem = (target, items, boxes, startIndex, direction) => {
             requestAnimationFrame(() => {
                 console.log('here');
                 
-                setElementPosition(item, { positionCallback: boxPosition, referenceItem: boxes[index + direction] });
+                setElementPosition(item, { positionCallback: rect, referenceItem: boxes[index + direction] });
             });
             boxes[index + direction]?.append(item);
         }

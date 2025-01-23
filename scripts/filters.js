@@ -1,4 +1,5 @@
 import { getTodo, deleteTask } from "./tasks.js";
+import { rect, setElementPosition } from './drag.js';
 
 const tasksList = document.querySelector('.list-tasks');
 const filterButtons = document.querySelectorAll('.filter-buttons > button');
@@ -50,6 +51,16 @@ function applyFilter(filterBtn){
 
         todo.filter = filterBtn.textContent;
         localStorage.setItem('todo', JSON.stringify(todo)); // Updates the selected filter in LocalStorage
+
+        //Readjustment of the 'element' position in relation to the 'box' position
+        taskBoxes.forEach(box => { 
+            const item = box.querySelector('.task');
+    
+            box.setAttribute('x', rect(box).left);
+            box.setAttribute('y', rect(box).top);
+    
+            setElementPosition(item, { positionCallback: rect, referenceItem: box });
+        });
     });
 };
 
