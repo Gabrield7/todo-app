@@ -1,18 +1,8 @@
-//import { getTodo, renderTasks } from './tasks.js'
 import { treatOverlapping, reorderItens } from './overlap.js'
+import { getTodo } from './tasks.js';
 
-//const container = document.querySelector('.container');
-const taskList = document.getElementsByClassName('list-tasks');
-//const boxes = Array.from(document.getElementsByClassName('task-box'));
-//const tasks = Array.from(boxes).map(box => box.getElementsByClassName('task'));
-const boxes = () => {
-    return Array.from(document.getElementsByClassName('task-box'));
-}
-const allItems = () => {
-    //const boxe =  Array.from(document.getElementsByClassName('task-box'));
-
-    return boxes().map(box => box.querySelector('.task'));
-}
+const boxes = () => Array.from(document.getElementsByClassName('task-box'));
+const allItems = () => boxes().map(box => box.querySelector('.task'));
 
 let element = {
     target: null,
@@ -204,7 +194,7 @@ function backToPosition(item) {
     allItems().forEach(task => {
         task.style.opacity = 1;
         
-        if (task !== element.target){// && 
+        if (task !== element.target){
             //(rect(task).top !== rect(task.parentElement).top || rect(task).left !== rect(task.parentElement).left)){
             //requestAnimationFrame(() => {
                 //setElementPosition(task, { positionCallback: boxPosition, referenceItem: task.parentElement });
@@ -220,17 +210,38 @@ function backToPosition(item) {
         });
 
         element.locked = false;
-        console.log('box', rect(boxItem).left);
-        console.log('item', rect(item).left);
     }, 1000);
 
     element.target.removeAttribute('outlist');
+
+    function switchTasksPostion(){   
+        const todo = getTodo();
+
+        const targetId = element.target.querySelector('input').id;
+        const targetNumber = Number(targetId.split('-')[1]);
+        
+        const fromIndex = todo.tasks.findIndex(task => task.id === targetNumber);
+
+        const toIndex = allItems().findIndex(item => {
+            const itemId = item.querySelector('input').id;
+            const itemNumber = Number(itemId.split('-')[1]);
+            
+            return itemNumber === targetNumber;
+        });
+
+        const [movedItem] = todo.tasks.splice(fromIndex, 1);
+        
+        todo.tasks.splice(toIndex, 0, movedItem);
+        
+        localStorage.setItem('todo', JSON.stringify(todo));
+    };
+
+    switchTasksPostion();
     element.target = null;
 };
 
-function applyCursorEvents(box, boxe){
+function applyCursorEvents(box){
     const item = box.querySelectorAll('.task')[0];
-    //const boxRect = rect(box);
 
     box.setAttribute('x', rect(box).left);
     box.setAttribute('y', rect(box).top);
@@ -238,10 +249,6 @@ function applyCursorEvents(box, boxe){
     item.setAttribute('x', rect(item).left);
     item.setAttribute('y', rect(item).top);
     
-    // console.log(boxPosition(box));
-    // console.log(boxPosition(item));
-    // console.log(boxPosition(box).left === boxPosition(item).left);
-    // console.log(boxPosition(box).top === boxPosition(item).top);
     requestAnimationFrame(() => { 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
     })
@@ -276,24 +283,18 @@ function applyCursorEvents(box, boxe){
     });
     
     item.addEventListener('mousemove', () => {
-        if (element.target) { //!cursorGlobalState.throttled && 
+        if (element.target) {
 
             if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
                 element.offsetY = cursorGlobalState.y - rect(element.target).top;
                 element.offsetX = cursorGlobalState.x - rect(element.target).left;
                 element.locked = true;
-            }
+            };
 
             requestAnimationFrame(() => {
                 treatOverlapping(boxes());
                 reorderItens(boxes());
-            })
-
-            // cursorGlobalState.throttled = true;
-
-            // setTimeout(() => {
-            //     cursorGlobalState.throttled = false;
-            // }, 100);
+            });
         };
     });
 
@@ -316,14 +317,9 @@ function applyCursorEvents(box, boxe){
 
         if(!cursorGlobalState.mouseDown && element.target === item) backToPosition(item);
     });
-    //console.log('box', rect(box).left);
-    //console.log('item', rect(item).left);
     
     //Adjust the task element position when the viewport is rezided
     window.addEventListener('resize', () => {
-        //console.log('box', rect(box).left);
-        //console.log('item', rect(item).left);
-
         box.setAttribute('x', rect(box).left);
         box.setAttribute('y', rect(box).top);
 

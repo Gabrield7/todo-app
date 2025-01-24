@@ -40,9 +40,6 @@ function createTaskElement(taskID, taskDescription){
     taskBox.appendChild(taskElement);
     tasksList.appendChild(taskBox);
 
-    // const input = taskElement.querySelector('input');
-    // taskCheckEvent(input);
-
     const deleteButton = taskElement.querySelector('.task-exclude');
     deleteEventClick(deleteButton); //adds the 'delete task' event to the 'delete button'
 
@@ -58,7 +55,6 @@ function createTask(){
     
     // ID defination
     const taskIdArray = todo.tasks.map(task => task.id);
-    //console.log(taskIdArray);
     
     function generateID(tasks) {
         const reorderIds = tasks.slice().sort((a, b) => a - b);
@@ -94,7 +90,7 @@ function createTask(){
     const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(taskBoxes, state.selectedFilter);
     
-    applyCursorEvents(taskBox, boxes());
+    applyCursorEvents(taskBox);
     //Readjustment of the 'element' position in relation to the 'box' position
     boxes().forEach(box => { 
         const item = box.querySelector('.task');
@@ -114,7 +110,7 @@ function deleteTask(element){
     if(index !== -1) todo.tasks.splice(index, 1);
     
     localStorage.setItem('todo', JSON.stringify(todo));
-    
+
     if(tasksList.childElementCount === 0){ //Restore the 'filter' button style
         filterButtons.forEach(button => {
             button.style.color = 'var(--dark-grayish-blue)';
@@ -143,8 +139,8 @@ async function renderTasks() {
     const todo = getTodo();
     if(todo.tasks.length === 0) return;
 
-    await Promise.all(todo.tasks.map((task, index) => {
-        const taskElement = createTaskElement(index, task.description).element; //recreate the tasks when the page is reloaded
+    await Promise.all(todo.tasks.map((task) => {
+        const taskElement = createTaskElement(task.id, task.description).element; //recreate the tasks when the page is reloaded
 
         const taskInput = taskElement.querySelector('input');
         taskCheckEvent(taskInput);
@@ -170,14 +166,9 @@ function taskCheckEvent(input){
     input.addEventListener('change', () => {
         const todo = getTodo();
         const taskID = Number(input.id.split('-')[1]); //Task number regitered in DOM
-        console.log(taskID);
-        
         const taskIndex = todo.tasks.findIndex(task => task.id === taskID);
-        //console.log(todo.tasks);
-        
-        //console.log(todo.tasks[taskIndex]);
+
         todo.tasks[taskIndex].completed = input.checked ? true:false;
-        //console.log(todo.tasks);
         
         localStorage.setItem('todo', JSON.stringify(todo));
         strikeDescription(input);
@@ -202,8 +193,6 @@ function strikeDescription(input){ //Adds an 'strike' effect to content tasks ma
 
 function totalTasks(){ //Shows (and update) how many tasks left to complete
     const todo = getTodo();
-    //const tasks = todo.tasks;
-    //console.log(todo);
     
     const taskFilters = document.querySelector('.task-filters span');
 

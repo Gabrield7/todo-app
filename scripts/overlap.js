@@ -66,18 +66,13 @@ function treatOverlapping(boxes){
         const overlapItems = overlappingStatus(element.target, item, 1, 1);
 
         if(item.hasAttribute('overlapping') && switchBack && item === largestOverlapItem){
-            //requestAnimationFrame(() => {
-                switchItens(element.target, item);
-            //});
+            switchItens(element.target, item);
         };
 
         if (overlapItems && !item.hasAttribute('overlapping') && item === largestOverlapItem){
             item.setAttribute('overlapping', '');
             if(!element.target.hasAttribute('outlist') && (index === targetIndices.after || index === targetIndices.before)){   
-                //switchItens(element.target, item);
-                //requestAnimationFrame(() => {
-                    switchItens(element.target, item);
-                //});
+                switchItens(element.target, item);
 
                 switchBack = true;
             }
@@ -129,21 +124,19 @@ const moveItem = (target, items, boxes, startIndex, direction) => {
     boxes.forEach((box, index) => {
         const item = items[index];
 
-        // if (item.style.transition) { //In case the animation get interrupted
-        //     const computedStyle = window.getComputedStyle(item);
-        //     const currentLeft = computedStyle.left;
-        //     const currentTop = computedStyle.top;
-        //     item.style.transition = 'none';
-        //     item.style.left = currentLeft;
-        //     item.style.top = currentTop;
-        //     void item.offsetWidth;
-        //     item.style.transition = 'all 0.5s ease-in-out';
-        // }
+        if (item.style.transition) { //In case the animation get interrupted
+            const computedStyle = window.getComputedStyle(item);
+            const currentLeft = computedStyle.left;
+            const currentTop = computedStyle.top;
+            item.style.transition = 'none';
+            item.style.left = currentLeft;
+            item.style.top = currentTop;
+            void item.offsetWidth;
+            item.style.transition = 'all 0.5s ease-in-out';
+        }
 
         if (index >= startIndex && item && item !== target) {
             requestAnimationFrame(() => {
-                console.log('here');
-                
                 setElementPosition(item, { positionCallback: rect, referenceItem: boxes[index + direction] });
             });
             boxes[index + direction]?.append(item);
@@ -196,15 +189,6 @@ function reorderItens(boxes){
             moveItem(element.target, items, boxes, moveFromIndex, direction);
         };
     };
-    
-    boxes.forEach((box, index)=> {
-        const item = box.querySelector('.task')
-        
-        if (item !== element.target && boxPosition(box) !== boxPosition(item)){
-            //setElementPosition(item, { positionCallback: boxPosition, referenceItem: box });
-        };
-    });
-
 };
 
 export { treatOverlapping, reorderItens }

@@ -6,6 +6,8 @@ const filterButtons = document.querySelectorAll('.filter-buttons > button');
 const [filterAllBtn, filterActiveBtn, filterCompletedBtn] = filterButtons;
 const clearCompletedBtn = document.querySelector('.clear-tasks');
 
+const boxes = () => Array.from(document.getElementsByClassName('task-box'));
+
 const state = { //Stores in a exportable variable the actual selected filter
     selectedFilter: null,
 };
@@ -19,13 +21,10 @@ function restoreButtonStyle(btn){
 };
 
 function displayElement(list, filterBtn){
-    list.forEach(element => {
-        //console.log('display');
-        //console.log(element);
-        
+    boxes().forEach(element => {
         const taskElement = element.querySelector('.task');
     
-        const isFilterAll = filterBtn=== filterAllBtn;
+        const isFilterAll = filterBtn === filterAllBtn;
         const isFilterActive = filterBtn === filterActiveBtn;
         
         if(isFilterAll) {
@@ -39,11 +38,10 @@ function displayElement(list, filterBtn){
 };
 
 function applyFilter(filterBtn){
-    const todo = getTodo();
-    
     filterBtn.addEventListener('click', () => {
+        const todo = getTodo();
+
         const taskBoxes = tasksList.querySelectorAll('.task-box');
-        //taskBoxes.forEach(element => displayElement(element, state.selectedFilter));
         displayElement(taskBoxes, filterBtn);
 
         restoreButtonStyle(filterBtn);
@@ -65,6 +63,7 @@ function applyFilter(filterBtn){
 };
 
 const applyFilterButton = () => {
+    
     filterButtons.forEach(button => applyFilter(button));
 
     clearCompletedBtn.addEventListener('click', () => {
