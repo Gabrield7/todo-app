@@ -1,15 +1,11 @@
 import { createTask, renderTasks, totalTasks, getTodo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
-import { applyCursorEvents, rect } from './drag.js'
+import { applyCursorEvents} from './drag.js'
 
 const todo = getTodo();
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
-
-const boxes = () => {
-    return Array.from(document.getElementsByClassName('task-box'));
-};
 
 //TASKS 
 addTaskInput.addEventListener('keydown', (e) => {
@@ -19,15 +15,6 @@ addTaskInput.addEventListener('keydown', (e) => {
         createTask();
     };
 });
-
-// addTaskInput.addEventListener('blur', (e) => {
-//     if (addTaskInput.value !== '') {
-//         e.preventDefault();
-        
-//         createTask();
-//     };
-// });
-
 
 //FILTERS
 if (!state.selectedFilter) {
@@ -40,7 +27,7 @@ if (!state.selectedFilter) {
     localStorage.setItem('todo', JSON.stringify(todo));
 }
 
-//DARK THEME
+//THEME
 function updateTheme(theme) {
     if (theme === 'dark') {
         body.classList.add('dark');
@@ -51,11 +38,9 @@ function updateTheme(theme) {
     localStorage.setItem('todo', JSON.stringify(todo));
 }
 
-// Initialize the item when the pages reload
-updateTheme(todo.theme || 'light');
+updateTheme(todo.theme || 'light'); // Initialize the item when the pages reload
 
-// Switches the theme when click the 'theme' button
-theme.addEventListener('click', (e) => {
+theme.addEventListener('click', (e) => { // Switches the theme when click the 'theme' button
     e.preventDefault();
     const newTheme = body.classList.toggle('dark')? 'dark' : 'light';
     updateTheme(newTheme);

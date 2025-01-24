@@ -19,6 +19,15 @@ This a single page application based on [Frontend Mentor Desgin](https://www.fro
 - Toggle light and dark mode;
 - Drag and drop to reorder items on the list.
 
+## 📖 Extra details
+
+- Aiming a better personalization to the drag and drop (DnD), I decided to develop a whole Dnd system from scratch by not using any native drag event from JS (dragstart, dragover, dragend, etc.);
+- This system was developed int two strands: the <b>drag.js</b> and <b>overlap.js</b>.
+- The <b>drag.js</b> is responsable for apply the moviment of the the tasks elements next to the cursor by using
+`item.style.left` and `item.style.top` property.
+- The <b>overlap.js</b> idetifies when a dragged element is overlapping other tasks and applies the interactions of switch/reorder positions;
+- The coding process was really challenging, but algo very enjoyable becasue it allows me to learn a lot more of the DOM limitations/features/interactions and the Vanilla JS itself; 
+
 ## 💻 Technologies used
 
 <p>

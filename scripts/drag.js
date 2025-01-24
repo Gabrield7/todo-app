@@ -1,6 +1,7 @@
 import { treatOverlapping, reorderItens } from './overlap.js'
 import { getTodo } from './tasks.js';
 
+const tasksList = document.querySelector('.list-tasks');
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
 const allItems = () => boxes().map(box => box.querySelector('.task'));
 
@@ -8,7 +9,7 @@ let element = {
     target: null,
     offsetX: null,
     offsetY: null,
-    locked: null //Trava de proteção para que seja aguardado o elemento chegar à posição original antes de interagir novamente com ele
+    locked: null //Protective lock to prevent any interactions until the element reaches its original position
 };
 
 const rect = target => target.getBoundingClientRect();
@@ -31,54 +32,6 @@ const setElementPosition = (item, { positionCallback, referenceItem, left, top }
     }
 };
 
-function isInsideItemArea(xPosition, yPosition){
-    if (!element.target) return;
-
-    const internArea = insideItemArea(element.target, .5, 1);
-
-    if(xPosition > internArea.left && xPosition < internArea.right && yPosition > internArea.top && yPosition < internArea.bottom){
-        return true;
-    }
-
-    return false;
-};
-
-const cursorGlobalState = (() => {
-    const cursorPosition = {
-        x: null,
-        y: null,
-        lastX: null,
-        lastY: null,
-        mouseDownTime: null,
-        mouseDown: false,
-        throttled: false //Trava para evitar o registro muito elevado de eventos realizados em 'mousemove'
-    };
-    // Atualiza as coordenadas do cursor globalmente
-    window.addEventListener('mousemove', (e) => {        
-        cursorPosition.lastX = cursorPosition.x;
-        cursorPosition.lastY = cursorPosition.y;
-
-        cursorPosition.x = e.clientX; // Posição X em relação à viewport
-        cursorPosition.y = e.clientY; // Posição Y em relação à viewport
-        
-        if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
-
-        if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight) { //Controle das bordas da janela do navegador
-            if(element.target) backToPosition(element.target);
-        }
-    });
-    // Detecta quando o botão do mouse é pressionado
-    window.addEventListener('mousedown', () => {
-        cursorPosition.mouseDown = true;
-    });
-    // Detecta quando o botão do mouse é liberado
-    window.addEventListener('mouseup', () => {
-        cursorPosition.mouseDown = false;
-    });
-    
-    return cursorPosition;
-})();
-
 function insideItemArea(item, xFactor, yFactor){
     if (!item || xFactor < 0 || yFactor < 0) return
 
@@ -93,90 +46,159 @@ function insideItemArea(item, xFactor, yFactor){
     };
 };
 
+function isInsideItemArea(xPosition, yPosition){
+    if (!element.target) return;
+
+    const { left, right, top, bottom } = insideItemArea(element.target, 0.7, 1);
+
+    return (
+        xPosition > left &&
+        xPosition < right &&
+        yPosition > top &&
+        yPosition < bottom
+    );
+};
+
+const cursorGlobalState = (() => {
+    const cursorPosition = {
+        x: null,
+        y: null,
+        lastX: null,
+        lastY: null,
+        mouseDownTime: null,
+        mouseDown: false,
+    };
+    // Updates the cursor coordinates globally
+    window.addEventListener('mousemove', (e) => {        
+        cursorPosition.lastX = cursorPosition.x;
+        cursorPosition.lastY = cursorPosition.y;
+
+        cursorPosition.x = e.clientX; // 'X' position in relation to the viewport
+        cursorPosition.y = e.clientY; // 'Y' position in relation to the viewport
+        
+        if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
+
+        if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight && element.target) backToPosition(element.target); //Browser window edge control
+    
+    });
+    // Detects when the mouse button (left one) is clicked
+    window.addEventListener('mousedown', () => {
+        cursorPosition.mouseDown = true;
+    });
+    // Detects when the mouse button (left one) has been released
+    window.addEventListener('mouseup', () => {
+        cursorPosition.mouseDown = false;
+    });
+    
+    return cursorPosition;
+})();
+
 function followCursor(target) {    
     if(!element.offsetX || !element.offsetY) return;
     
     const targetRect = rect(target);
-    const delta = { //Deslocamento do cursor ao relação a movimentação anterior
+    const delta = { //Cursor displacement in relation to the previous movement
         x: cursorGlobalState.x - cursorGlobalState.lastX || 0,
         y: cursorGlobalState.y - cursorGlobalState.lastY || 0
     };
     
-    //let left = rect(element.target).left;
-    //if(element.locked){
-        let left = cursorGlobalState.x - element.offsetX;
-    //};
+    let left = rect(element.target).left;
+    if(element.locked){
+        left = cursorGlobalState.x - element.offsetX;
+    };
 
     let top = cursorGlobalState.y - element.offsetY;
     
-    // Verifica as bordas ESQUERDA e DIREITA
+    // Checks the RIGHT and LEFT edges
     if (targetRect.right >= window.innerWidth || targetRect.left <= 0) {
-        // Borda direita
+        // Right edge
         if (targetRect.right >= window.innerWidth) {
-            left = targetRect.right - targetRect.width; // Cálculo do 'left' para a borda direita
+            left = targetRect.right - targetRect.width; // Calculation of 'left' variable for the right edge
             
-            if (delta.x <= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor
+            if (delta.x <= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor
                 element.offsetX = cursorGlobalState.lastX - targetRect.left;
-                left = cursorGlobalState.x - element.offsetX; // Atualiza a posição X para seguir o cursor
+                left = cursorGlobalState.x - element.offsetX; // Updates the 'X' position to follow the cursor
             };
         };
-        // Borda esquerda
+        // Left edge
         if (targetRect.left <= 0) {
-            left = 0; // Cálculo do 'left' para a borda esquerda
+            left = 0; // Calculation of 'left' variable for the right edge
             
-            if (delta.x >= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor
+            if (delta.x >= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor
                 element.offsetX = cursorGlobalState.lastX - targetRect.left;
-                left = cursorGlobalState.x - element.offsetX; // Atualiza a posição X para seguir o cursor
+                left = cursorGlobalState.x - element.offsetX; // Updates the 'X' position to follow the cursor
             };
         };
     };
 
-    // Verifica as bordas SUPERIOR e INFERIOR
-    //if(element.locked){
+    // Checks the TOP and BOTTOM edges
+    if(element.locked){
         if (targetRect.bottom >= window.innerHeight || targetRect.top <= 0) {
-            // Borda inferior
+            // Bottom edge
             if (targetRect.bottom >= window.innerHeight) {
-                top = targetRect.bottom - targetRect.height; // Cálculo do 'top' para a borda inferior
+                top = targetRect.bottom - targetRect.height; // Calculation of 'Top' variable for the right edge
                 
-                if (delta.y <= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor 
+                if (delta.y <= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor
                     element.offsetY = cursorGlobalState.lastY - targetRect.top;
-                    top = cursorGlobalState.y - element.offsetY; // Atualiza a posição Y para seguir o cursor
+                    top = cursorGlobalState.y - element.offsetY; // Updates the 'Y' position to follow the cursor
                 };
             };
-            // Borda superior
+            // Top edge
             if (targetRect.top <= 0) {
-                top = 0; // Cálculo do 'top' para a borda superior
+                top = 0; // Calculation of 'Top' variable for the right edge
                  
-                if (delta.y >= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor
+                if (delta.y >= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor
                     element.offsetY = cursorGlobalState.lastY - targetRect.top;
-                    top = cursorGlobalState.y - element.offsetY; // Atualiza a posição Y para seguir o cursor
+                    top = cursorGlobalState.y - element.offsetY; // Updates the 'Y' position to follow the cursor
                 };
             };
         }; 
-    //}else{
-        // if (targetRect.bottom >= rect(container).bottom || targetRect.top <= rect(container).top) {
-        //     // Borda inferior
-        //     if (targetRect.bottom >= rect(container).bottom) {
-        //         top = rect(container).bottom - rect(element.target).height; // Cálculo do 'top' para a borda inferior
-                
-        //         if (delta.y <= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor 
-        //             element.offsetY = cursorGlobalState.lastY - targetRect.top;
-        //             top = cursorGlobalState.y - element.offsetY; // Atualiza a posição Y para seguir o cursor
-        //         };
-        //     };
-        //     // Borda superior
-        //     if (targetRect.top <= rect(container).top) {
-        //         top = rect(container).top; // Cálculo do 'top' para a borda superior
+    }else{
+        if (targetRect.bottom >= rect(tasksList).bottom || targetRect.top <= rect(tasksList).top) {
+            // Bottom edge
+            if (targetRect.bottom >= rect(tasksList).bottom) {
+                top = rect(tasksList).bottom - rect(element.target).height; // Calculation of 'Top' variable for the right edge
+
+                if (delta.y <= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor 
+                    element.offsetY = cursorGlobalState.lastY - targetRect.top;
+                    top = cursorGlobalState.y - element.offsetY; // Updates the 'Y' position to follow the cursor
+                };
+            };
+            // Top edge
+            if (targetRect.top <= rect(tasksList).top) {
+                top = rect(tasksList).top; // Calculation of 'Top' variable for the right edge
                  
-        //         if (delta.y >= 0) { // Quando o cursor se movimentar na direção oposta à borda, o elemento deve voltar a 'se prender' ao cursor
-        //             element.offsetY = cursorGlobalState.lastY - targetRect.top;
-        //             top = cursorGlobalState.y - element.offsetY; // Atualiza a posição Y para seguir o cursor
-        //         };
-        //     };
-        // };
-    //};
+                if (delta.y >= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor
+                    element.offsetY = cursorGlobalState.lastY - targetRect.top;
+                    top = cursorGlobalState.y - element.offsetY; // Updates the 'Y' position to follow the cursor
+                };
+            };
+        };
+    };
     
     setElementPosition(element.target, { left, top });
+};
+
+function switchTasksPostion(){   
+    const todo = getTodo();
+
+    const targetId = element.target.querySelector('input').id;
+    const targetNumber = Number(targetId.split('-')[1]);
+    
+    const fromIndex = todo.tasks.findIndex(task => task.id === targetNumber);
+
+    const toIndex = allItems().findIndex(item => {
+        const itemId = item.querySelector('input').id;
+        const itemNumber = Number(itemId.split('-')[1]);
+        
+        return itemNumber === targetNumber;
+    });
+
+    const [movedItem] = todo.tasks.splice(fromIndex, 1);
+    
+    todo.tasks.splice(toIndex, 0, movedItem);
+    
+    localStorage.setItem('todo', JSON.stringify(todo));
 };
 
 function backToPosition(item) {   
@@ -186,22 +208,11 @@ function backToPosition(item) {
         item.style.transition = 'all 1s ease-in-out';
     };
 
-    //Estilos
     requestAnimationFrame(() => {
         setElementPosition(item, { positionCallback: rect, referenceItem: boxItem });
     });
-
-    allItems().forEach(task => {
-        task.style.opacity = 1;
-        
-        if (task !== element.target){
-            //(rect(task).top !== rect(task.parentElement).top || rect(task).left !== rect(task.parentElement).left)){
-            //requestAnimationFrame(() => {
-                //setElementPosition(task, { positionCallback: boxPosition, referenceItem: task.parentElement });
-            //});
-        };
-    });
-
+    //Styles
+    allItems().forEach(task => task.style.opacity = 1);
     item.style.zIndex = 0;
     
     setTimeout(() => {
@@ -214,28 +225,6 @@ function backToPosition(item) {
 
     element.target.removeAttribute('outlist');
 
-    function switchTasksPostion(){   
-        const todo = getTodo();
-
-        const targetId = element.target.querySelector('input').id;
-        const targetNumber = Number(targetId.split('-')[1]);
-        
-        const fromIndex = todo.tasks.findIndex(task => task.id === targetNumber);
-
-        const toIndex = allItems().findIndex(item => {
-            const itemId = item.querySelector('input').id;
-            const itemNumber = Number(itemId.split('-')[1]);
-            
-            return itemNumber === targetNumber;
-        });
-
-        const [movedItem] = todo.tasks.splice(fromIndex, 1);
-        
-        todo.tasks.splice(toIndex, 0, movedItem);
-        
-        localStorage.setItem('todo', JSON.stringify(todo));
-    };
-
     switchTasksPostion();
     element.target = null;
 };
@@ -245,9 +234,6 @@ function applyCursorEvents(box){
 
     box.setAttribute('x', rect(box).left);
     box.setAttribute('y', rect(box).top);
-
-    item.setAttribute('x', rect(item).left);
-    item.setAttribute('y', rect(item).top);
     
     requestAnimationFrame(() => { 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
@@ -276,7 +262,6 @@ function applyCursorEvents(box){
                 if(isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y)){
                     element.offsetX = cursorGlobalState.x - rect(element.target).left;
                     element.offsetY = cursorGlobalState.y - rect(element.target).top;
-                    //element.locked = true;
                 };
             };
         }, 250);
@@ -315,7 +300,7 @@ function applyCursorEvents(box){
             if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping')
         });         
 
-        if(!cursorGlobalState.mouseDown && element.target === item) backToPosition(item);
+        if(!cursorGlobalState.mouseDown && element.target === item || cursorGlobalState.mouseDown) backToPosition(item);
     });
     
     //Adjust the task element position when the viewport is rezided

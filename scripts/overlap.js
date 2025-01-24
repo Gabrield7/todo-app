@@ -1,8 +1,8 @@
-import { element, boxPosition, rect, setElementPosition, insideItemArea } from "./drag.js";
+import { element, rect, setElementPosition, insideItemArea } from "./drag.js";
 
-function overlappingStatus (draggedItem, overlappingItem, xFactor, yFactor) {
+function overlappingStatus(draggedItem, overlappingItem) {
     const draggedRect = rect(draggedItem);
-    const overlapRect = insideItemArea(overlappingItem, xFactor, yFactor);
+    const overlapRect = insideItemArea(overlappingItem, 1, 1);
 
     const isXOverlap =
     (draggedRect.right >= overlapRect.left && draggedRect.right <= overlapRect.right) ||
@@ -63,7 +63,7 @@ function treatOverlapping(boxes){
         if (!element.target || item === element.target) return;
 
         const largestOverlapItem = getMaxOverlapItem(element.target, [item, targetBox]);
-        const overlapItems = overlappingStatus(element.target, item, 1, 1);
+        const overlapItems = overlappingStatus(element.target, item);
 
         if(item.hasAttribute('overlapping') && switchBack && item === largestOverlapItem){
             switchItens(element.target, item);
@@ -90,7 +90,7 @@ function getMaxOverlapItem(element, boxes) {
     
     // Ensures 'box' to be a list, independentemente de ser um único elemento ou uma lista
     boxes.forEach((box) => {  
-        const area = overlappingStatus(element, box, 1, 1); // Get the overlapping area
+        const area = overlappingStatus(element, box); // Get the overlapping area
 
         if (area > maxArea) { 
             maxArea = area; 
@@ -117,7 +117,7 @@ function findDraggedIndex (target, boxes, overlapItems, targetBox) {
         return largestOverlap === targetBox ? null : boxes.findIndex(box => box.querySelector('.task') === largestOverlap);
     }
 
-    return boxes.findIndex(box => overlappingStatus(element.target, box, 1, 1));
+    return boxes.findIndex(box => overlappingStatus(element.target, box));
 };
 
 const moveItem = (target, items, boxes, startIndex, direction) => {
@@ -155,29 +155,27 @@ function reorderItens(boxes){
     const isOutList = element.target.hasAttribute('outlist'); //Checks if the target isn't overlapping other elements in the list
     const items = boxes.map(box => box.querySelector('.task'));
     const targetBox = boxes.find(box => box.contains(element.target));
-    const targetBoxOverlap = !!overlappingStatus(element.target, targetBox, 1, 1); // checks if the target isn't overlapping its own 'box'
+    const targetBoxOverlap = !!overlappingStatus(element.target, targetBox); // checks if the target isn't overlapping its own 'box'
 
-    const overlapAnyBox = boxes.some(box => overlappingStatus(element.target, box, 1, 1));    
-    const overlapItems = items.filter(item => item !== element.target && overlappingStatus(element.target, item, 1, 1));
+    const overlapAnyBox = boxes.some(box => overlappingStatus(element.target, box));    
+    const overlapItems = items.filter(item => item !== element.target && overlappingStatus(element.target, item));
 
     if(!overlapAnyBox && !isOutList){ //Item moves from 'inside' the list to 'outside' of it
-        console.log('case 1');
-        
         element.target.setAttribute('outlist','');
         const draggedItemIndex = boxes.findIndex(box => box.contains(element.target));
 
         moveItem(element.target, items, boxes, draggedItemIndex, -1);
     };
+
     if (overlapAnyBox && isOutList){ //Item moves from 'outside' the list to 'inside' of it
-        console.log('case 2');
         element.target.removeAttribute('outlist');
         const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);  
 
         if (!draggedItemIndex) return;
         moveItem(element.target, items, boxes, draggedItemIndex, 1);
     };
+    
     if(overlapAnyBox && !isOutList && !targetBoxOverlap){ //Item moves 'inside' the list
-        console.log('case 3');
         element.target.removeAttribute('outlist');
         const initialTargetIndex = boxes.findIndex(box => box.contains(element.target));
         const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);

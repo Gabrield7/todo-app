@@ -88,7 +88,7 @@ function createTask(){
 
     //Shows the task element
     const taskBoxes = tasksList.querySelectorAll('.task-box');
-    displayElement(taskBoxes, state.selectedFilter);
+    displayElement(state.selectedFilter);
     
     applyCursorEvents(taskBox);
     //Readjustment of the 'element' position in relation to the 'box' position
@@ -157,7 +157,7 @@ async function renderTasks() {
     }));
 
     const taskBoxes = tasksList.querySelectorAll('.task-box');
-    displayElement(taskBoxes, state.selectedFilter);
+    displayElement(state.selectedFilter);
 
     return taskBoxes;
 };
@@ -175,7 +175,7 @@ function taskCheckEvent(input){
         totalTasks();
 
         const taskBoxes = tasksList.querySelectorAll('.task-box');
-        displayElement(taskBoxes, state.selectedFilter);
+        displayElement(state.selectedFilter);
     });
 };
 

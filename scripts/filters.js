@@ -20,7 +20,7 @@ function restoreButtonStyle(btn){
     });
 };
 
-function displayElement(list, filterBtn){
+function displayElement(filterBtn){
     boxes().forEach(element => {
         const taskElement = element.querySelector('.task');
     
@@ -34,7 +34,6 @@ function displayElement(list, filterBtn){
             element.style.display = (isFilterActive ? taskState : !taskState)? 'none':'flex';
         };
     });
-    
 };
 
 function applyFilter(filterBtn){
@@ -42,7 +41,7 @@ function applyFilter(filterBtn){
         const todo = getTodo();
 
         const taskBoxes = tasksList.querySelectorAll('.task-box');
-        displayElement(taskBoxes, filterBtn);
+        displayElement(filterBtn);
 
         restoreButtonStyle(filterBtn);
         state.selectedFilter = filterBtn; // Updates the selected exportable filter variable
@@ -63,11 +62,9 @@ function applyFilter(filterBtn){
 };
 
 const applyFilterButton = () => {
-    
     filterButtons.forEach(button => applyFilter(button));
 
     clearCompletedBtn.addEventListener('click', () => {
-        //const taskElements = tasksList.querySelectorAll('.task');
         const taskBoxes = tasksList.querySelectorAll('.task-box');
 
         taskBoxes.forEach(element => {
