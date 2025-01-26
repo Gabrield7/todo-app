@@ -149,9 +149,7 @@ const moveItem = (target, items, boxes, startIndex, direction) => {
     });
 };
 
-function reorderItens(boxes){
-    console.log('here');
-    
+function reorderItens(boxes){   
     if (!element.target) return;
     
     const isOutList = element.target.hasAttribute('outlist'); //Checks if the target isn't overlapping other elements in the list

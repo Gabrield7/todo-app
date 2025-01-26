@@ -2,7 +2,6 @@ import { treatOverlapping, reorderItens } from './overlap.js'
 import { getTodo } from './tasks.js';
 import { keyboardActive } from './main.js';
 
-
 const tasksList = document.querySelector('.list-tasks');
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
 const allItems = () => boxes().map(box => box.querySelector('.task'));
@@ -36,14 +35,17 @@ const boxPosition = (box) => {
 
 const setElementPosition = (item, { positionCallback, referenceItem, left, top }) => {     
     if(keyboardActive) return;
-    
+
+    const scrollLeft = window.scrollX || 0;
+    const scrollTop = window.scrollY || 0;
+
     if (positionCallback && referenceItem) {
         const { left: calcLeft, top: calcTop } = positionCallback(referenceItem);
-        item.style.left = `${calcLeft}px`;
-        item.style.top = `${calcTop}px`;
+        item.style.left = `${calcLeft + scrollLeft}px`;
+        item.style.top = `${calcTop + scrollTop}px`;
     } else if (left !== undefined && top !== undefined) {
-        item.style.left = `${left}px`;
-        item.style.top = `${top}px`;
+        item.style.left = `${left + scrollLeft}px`;
+        item.style.top = `${top + scrollTop}px`;
     }
 };
 
@@ -283,10 +285,21 @@ function applyCursorEvents(box){
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
     });
 
-    const observer = new ResizeObserver(() => {
+    const resizeObserver = new ResizeObserver(() => {
         box.style.height = `${item.offsetHeight}px`
     });
-    observer.observe(item);
+    resizeObserver.observe(item);
+
+    const positionObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                //console.log('Posição modificada:', rect(box).left, rect(box).top);
+                //console.log(item);
+                
+            }
+        });
+    });
+    positionObserver.observe(box, { attributes: true });
 
     item.addEventListener('mousedown', e => {
         e.preventDefault();
@@ -422,9 +435,21 @@ function applyCursorEvents(box){
 
             isTouchActive = false;
         });
-    }
+    };
+
+    window.addEventListener('scroll', (e) => {
+        if(!element.target) return;
+
+        // const scrollX = window.scrollX;
+        // const scrollY = window.scrollY;
+
+        // let left = rect(element.target).left + scrollX;
+        // let top = rect(element.target).top + scrollY;
+
+        followCursor(element.target)
+    });
     //Adjust the task element position when the viewport is rezided
-    window.addEventListener('resize', () => {
+    window.addEventListener('resize', () => { 
         if(getDeviceType() !== 'desktop') return;
         
         box.setAttribute('x', rect(box).left);
@@ -432,6 +457,8 @@ function applyCursorEvents(box){
 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
     });
+
+    
 };
 
 export {element, keyboardActive, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents}

@@ -95,16 +95,14 @@ function createTask(){
     
     applyCursorEvents(taskBox);
     //Readjustment of the 'element' position in relation to the 'box' position
-    boxes().forEach(box => { 
-        const item = box.querySelector('.task');
-        // console.log('createtask x', rect(box).left);
-        // console.log('createtask y', rect(box).top);
-        console.log(box);
-
-        setElementPosition(item, { positionCallback: rect, referenceItem: box });
-        console.log('createtask x', rect(item).left);
-        console.log('createtask y', rect(item).top);
-    });
+    setTimeout(() => {
+        boxes().forEach(box => { 
+            const item = box.querySelector('.task');
+    
+            setElementPosition(item, { positionCallback: rect, referenceItem: box });
+            console.log('reposicioned'); 
+        });
+    }, 10)
 
 };
 
@@ -126,19 +124,16 @@ function deleteTask(element){
         });
     };
 
-    boxes().forEach(box => { //Readjustment of the 'element' position in relation to the 'box' position
-        const item = box.querySelector('.task');
-
-        box.setAttribute('x', rect(box).left);
-        box.setAttribute('y', rect(box).top);
-        // console.log('deletetask x', rect(box).left);
-        // console.log('deletetask y', rect(box).top);
-        console.log(box);
-        
-        setElementPosition(item, { positionCallback: rect, referenceItem: box });
-        console.log('deletetask x', rect(item).left);
-        console.log('deletetask y', rect(item).top);
-    });
+    setTimeout(() => {
+        boxes().forEach(box => { //Readjustment of the 'element' position in relation to the 'box' position
+            const item = box.querySelector('.task');
+    
+            box.setAttribute('x', rect(box).left);
+            box.setAttribute('y', rect(box).top);
+            
+            setElementPosition(item, { positionCallback: rect, referenceItem: box });
+        });
+    }, 10)
 };
 
 function deleteEventClick(button){
