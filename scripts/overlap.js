@@ -124,16 +124,16 @@ const moveItem = (target, items, boxes, startIndex, direction) => {
     boxes.forEach((box, index) => {
         const item = items[index];
 
-        if (item.style.transition) { //In case the animation get interrupted
-            const computedStyle = window.getComputedStyle(item);
-            const currentLeft = computedStyle.left;
-            const currentTop = computedStyle.top;
-            item.style.transition = 'none';
-            item.style.left = currentLeft;
-            item.style.top = currentTop;
-            void item.offsetWidth;
-            item.style.transition = 'all 0.5s ease-in-out';
-        }
+        // if (item.style.transition) { //In case the animation get interrupted
+        //     const computedStyle = window.getComputedStyle(item);
+        //     const currentLeft = computedStyle.left;
+        //     const currentTop = computedStyle.top;
+        //     item.style.transition = 'none';
+        //     item.style.left = currentLeft;
+        //     item.style.top = currentTop;
+        //     void item.offsetWidth;
+        //     item.style.transition = 'all 0.5s ease-in-out';
+        // }
 
         if (index >= startIndex && item && item !== target) {
             requestAnimationFrame(() => {
@@ -150,6 +150,8 @@ const moveItem = (target, items, boxes, startIndex, direction) => {
 };
 
 function reorderItens(boxes){
+    console.log('here');
+    
     if (!element.target) return;
     
     const isOutList = element.target.hasAttribute('outlist'); //Checks if the target isn't overlapping other elements in the list

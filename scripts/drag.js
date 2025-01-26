@@ -1,5 +1,7 @@
 import { treatOverlapping, reorderItens } from './overlap.js'
 import { getTodo } from './tasks.js';
+import { keyboardActive } from './main.js';
+
 
 const tasksList = document.querySelector('.list-tasks');
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
@@ -12,6 +14,17 @@ let element = {
     locked: null //Protective lock to prevent any interactions until the element reaches its original position
 };
 
+function getDeviceType() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (/mobile|android|iphone|ipad|ipod/.test(userAgent)) {
+        return 'mobile';
+    } else if (/tablet/.test(userAgent)) {
+        return 'tablet';
+    } else {
+        return 'desktop';
+    }
+}
+
 const rect = target => target.getBoundingClientRect();
 
 const boxPosition = (box) => {
@@ -22,6 +35,8 @@ const boxPosition = (box) => {
 };
 
 const setElementPosition = (item, { positionCallback, referenceItem, left, top }) => {     
+    if(keyboardActive) return;
+    
     if (positionCallback && referenceItem) {
         const { left: calcLeft, top: calcTop } = positionCallback(referenceItem);
         item.style.left = `${calcLeft}px`;
@@ -89,6 +104,31 @@ const cursorGlobalState = (() => {
     window.addEventListener('mouseup', () => {
         cursorPosition.mouseDown = false;
     });
+
+    if(getDeviceType() !== 'desktop'){
+        window.addEventListener('touchmove', (e) => {        
+            const touch = e.changedTouches[0];
+            
+            cursorPosition.lastX = cursorPosition.x;
+            cursorPosition.lastY = cursorPosition.y;
+    
+            cursorPosition.x = touch.pageX; // 'X' position in relation to the viewport
+            cursorPosition.y = touch.pageY; // 'Y' position in relation to the viewport
+            
+            if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
+    
+            if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight && element.target) backToPosition(element.target); //Browser window edge control
+        
+        });
+        // Detects when the mouse button (left one) is clicked
+        window.addEventListener('touchstart', () => {
+            cursorPosition.mouseDown = true;
+        });
+        // Detects when the mouse button (left one) has been released
+        window.addEventListener('touchend', () => {
+            cursorPosition.mouseDown = false;
+        });
+    };
     
     return cursorPosition;
 })();
@@ -116,6 +156,7 @@ function followCursor(target) {
             left = targetRect.right - targetRect.width; // Calculation of 'left' variable for the right edge
             
             if (delta.x <= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor
+                
                 element.offsetX = cursorGlobalState.lastX - targetRect.left;
                 left = cursorGlobalState.x - element.offsetX; // Updates the 'X' position to follow the cursor
             };
@@ -173,6 +214,7 @@ function followCursor(target) {
                     top = cursorGlobalState.y - element.offsetY; // Updates the 'Y' position to follow the cursor
                 };
             };
+
         };
     };
     
@@ -202,6 +244,8 @@ function switchTasksPostion(){
 };
 
 function backToPosition(item) {   
+    if(!element.target) return;
+
     const boxItem = item.parentElement;
     
     if (!item.style.transition){
@@ -237,14 +281,18 @@ function applyCursorEvents(box){
     
     requestAnimationFrame(() => { 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
-    })
+    });
+
+    const observer = new ResizeObserver(() => {
+        box.style.height = `${item.offsetHeight}px`
+    });
+    observer.observe(item);
 
     item.addEventListener('mousedown', e => {
         e.preventDefault();
         cursorGlobalState.mouseDownTime = setTimeout(() => {
             if (!element.locked){
                 const excludedSelectors = ['input', 'label', 'button'];
-
                 if (excludedSelectors.some(selector => e.target.matches(selector))) return;
                 
                 element.target = e.target.closest('.task'); //Selects the element
@@ -269,7 +317,6 @@ function applyCursorEvents(box){
     
     item.addEventListener('mousemove', () => {
         if (element.target) {
-
             if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
                 element.offsetY = cursorGlobalState.y - rect(element.target).top;
                 element.offsetX = cursorGlobalState.x - rect(element.target).left;
@@ -302,9 +349,84 @@ function applyCursorEvents(box){
 
         if(!cursorGlobalState.mouseDown && element.target === item || cursorGlobalState.mouseDown) backToPosition(item);
     });
+
+    if(getDeviceType() !== 'desktop'){
+        let isTouchActive = false;
+        item.addEventListener('touchstart', (e) => { 
+            if (isTouchActive) {
+                e.stopPropagation();
+                e.preventDefault();
+                console.log('Outro toque bloqueado.');
+                return;
+            };
+            isTouchActive = true;
+            
+            const excludedSelectors = ['input', 'label', 'button'];
+            if (!excludedSelectors.some(selector => e.target.matches(selector))) e.preventDefault();
     
+            cursorGlobalState.mouseDownTime = setTimeout(() => {
+                if (!element.locked){
+                    element.target = e.target.closest('.task'); //Selects the element
+                    
+                    allItems().forEach(task => {
+                        if (element.target) {
+                            if (task !== element.target && !task.style.transition) {
+                                task.style.transition = 'all .5s ease-in-out';
+                            };
+                            task.style.opacity = task === element.target? 1 : 0.5;
+                            task.style.zIndex = task === element.target? 1 : 0;
+                        } 
+                    });
+                    
+                    const touch = e.changedTouches[0];
+                    if (isInsideItemArea(touch.pageX, touch.pageY)) {
+                        element.offsetX = touch.pageX - rect(element.target).left;
+                        element.offsetY = touch.pageY - rect(element.target).top;
+                    };
+                };
+            }, 200);
+        });
+    
+        item.addEventListener('touchmove', (e) => {
+            //if(keyboardActive) return;
+
+            if (element.target) {
+                if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
+                    const touch = e.changedTouches[0];
+                    cursorGlobalState.x = touch.pageX;
+                    cursorGlobalState.y = touch.pageY;
+
+                    element.offsetY = cursorGlobalState.y - rect(element.target).top;
+                    element.offsetX = cursorGlobalState.x - rect(element.target).left;
+                    
+                    if(element.offsetY <= 0 || element.offsetY >= item.offsetHeight) backToPosition(element.target);
+                    
+                    element.locked = true;
+                };
+    
+                requestAnimationFrame(() => {
+                    treatOverlapping(boxes());
+                    reorderItens(boxes());
+                });
+            };
+        });
+    
+        item.addEventListener('touchend', () => {
+            clearTimeout(cursorGlobalState.mouseDownTime);
+    
+            allItems().forEach(task => {
+                if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping');
+            });
+    
+            if(element.target === item) backToPosition(item);
+
+            isTouchActive = false;
+        });
+    }
     //Adjust the task element position when the viewport is rezided
     window.addEventListener('resize', () => {
+        if(getDeviceType() !== 'desktop') return;
+        
         box.setAttribute('x', rect(box).left);
         box.setAttribute('y', rect(box).top);
 
@@ -312,4 +434,4 @@ function applyCursorEvents(box){
     });
 };
 
-export {element, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents}
+export {element, keyboardActive, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents}

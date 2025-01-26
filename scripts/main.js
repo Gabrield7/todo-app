@@ -1,6 +1,6 @@
 import { createTask, renderTasks, totalTasks, getTodo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
-import { applyCursorEvents} from './drag.js'
+import { applyCursorEvents } from './drag.js'
 
 const todo = getTodo();
 const theme = document.querySelector('.theme-button');
@@ -13,7 +13,21 @@ addTaskInput.addEventListener('keydown', (e) => {
         e.preventDefault(); // Prevents the line break in the textarea 
 
         createTask();
+
+        addTaskInput.blur();
     };
+});
+
+export let keyboardActive = false;
+addTaskInput.addEventListener('focusin', () => {
+    keyboardActive = true;
+    console.log('teclado ativo');
+
+});
+
+addTaskInput.addEventListener('focusout', () => {
+    keyboardActive = false;
+    console.log('teclado inativo');
 });
 
 //FILTERS
@@ -60,3 +74,4 @@ applyFilterButton();
 
 window.addEventListener('resize', moveFilterButtons);
 document.addEventListener('DOMContentLoaded', moveFilterButtons);
+

@@ -29,7 +29,7 @@ body{
     background-repeat: no-repeat;
     transition: .5s;
     max-width: 1440px;
-    min-width: 375px;
+    min-width: 360px;
 }
 
 /* HEADER */
@@ -83,8 +83,8 @@ header{
 }
 .filter-buttons__mobile{
     margin-top: 2rem;
-    justify-content: space-between;
-    padding: 16px 20%;
+    justify-content: center;
+    padding: 16px 32px;
 }
 
 .add-task, .add-task>input::placeholder{
@@ -111,9 +111,6 @@ header{
 .task-box:first-of-type, .task-box:first-of-type > .task{
     border-radius: 4px 4px 0 0;
 }
-/* .task-box:first-of-type > .task{
-    box-shadow: 2px 0px 20px var(--very-dark-grayish-blue);
-} */
 
 .task-box{
     background: transparent;
@@ -174,13 +171,6 @@ input[type='checkbox']:checked + .custom-checkbox::after{
     top: 0px;
     background: linear-gradient(hsl(192, 100%, 67%), hsl(280, 87%, 65%));
 }
-
-/* .check{
-    position: absolute;
-    height: 10px;
-    width: 10px;
-    margin-left: 5px;
-} */
 
 .task-exclude{
     background-image: url('./images/icon-cross.svg');
@@ -291,22 +281,23 @@ body.dark .custom-checkbox:hover{
 @media screen and (max-width: 650px){
     body{
         background-image: url('./images/bg-mobile-light.jpg');
+        /* overflow-x: hidden; */
     }
 
-    header, .add-task, .task, .task-filters, .filter-buttons__mobile, .tasks-container{
-        max-width: 536px;
-        min-width: 335px;
-    }
-
-    header{
-        width: calc(100% - 80px);
-    }
     header{
         margin-bottom: 2rem;
     }
-
-    .add-task, .task, .task-filters, .filter-buttons__mobile, .tasks-container{
+    header, .add-task, .task-box, .task, .tasks-container, .filter-buttons__mobile, footer{
+        width: calc(100% - 80px);
+        max-width: 536px;
+        min-width: 280px;
+    }
+    .task-box{
         width: 100%;
+    }
+    .task-filters{
+        width: 100%;
+        /* gap: 10px; */
     }
     .add-task{
         margin: 0 auto 32px;
@@ -314,5 +305,10 @@ body.dark .custom-checkbox:hover{
 
     body.dark{
         background-image: url('./images/bg-mobile-dark.jpg');
+    }
+}
+@media screen and (max-width: 500px){
+    .task-filters{
+        gap: 16px;
     }
 }

@@ -35,7 +35,7 @@ function createTaskElement(taskID, taskDescription){
     <input id='task-${taskID}' type='checkbox'>
     <label for='task-${taskID}' class="custom-checkbox"></label>
     <p class='task-description'>${taskDescription}</p>
-    <button class='task-exclude'></button>`;
+    <button type='button' class='task-exclude'></button>`;
     
     taskBox.appendChild(taskElement);
     tasksList.appendChild(taskBox);
@@ -50,7 +50,10 @@ function createTaskElement(taskID, taskDescription){
 };
 
 function createTask(){
-    if(addTaskInput.value === '') return;
+    if(addTaskInput.value.trim() === ''){
+        addTaskInput.value = '';
+        return;
+    }
     const todo = getTodo();
     
     // ID defination
@@ -94,9 +97,15 @@ function createTask(){
     //Readjustment of the 'element' position in relation to the 'box' position
     boxes().forEach(box => { 
         const item = box.querySelector('.task');
+        // console.log('createtask x', rect(box).left);
+        // console.log('createtask y', rect(box).top);
+        console.log(box);
 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
+        console.log('createtask x', rect(item).left);
+        console.log('createtask y', rect(item).top);
     });
+
 };
 
 function deleteTask(element){
@@ -122,16 +131,22 @@ function deleteTask(element){
 
         box.setAttribute('x', rect(box).left);
         box.setAttribute('y', rect(box).top);
-
+        // console.log('deletetask x', rect(box).left);
+        // console.log('deletetask y', rect(box).top);
+        console.log(box);
+        
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
+        console.log('deletetask x', rect(item).left);
+        console.log('deletetask y', rect(item).top);
     });
 };
 
 function deleteEventClick(button){
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {       
         const li = button.parentElement.parentElement;
         deleteTask(li);
         totalTasks();   
+        document.activeElement.blur();
     });
 };
 
@@ -174,8 +189,8 @@ function taskCheckEvent(input){
         strikeDescription(input);
         totalTasks();
 
-        const taskBoxes = tasksList.querySelectorAll('.task-box');
         displayElement(state.selectedFilter);
+        //if(input.checked) input.blur();
     });
 };
 
