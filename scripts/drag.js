@@ -76,27 +76,64 @@ function isInsideItemArea(xPosition, yPosition){
     );
 };
 
+// function cursorSpeed(currentX, currentY, lastX, lastY) {
+//     const currentTime = Date.now();
+//     const timeElapsed = currentTime - lastTime;
+
+//     if (timeElapsed === 0) return; // Evitar divisões por zero
+
+//     //const currentPosition = { x: event.clientX, y: event.clientY };
+//     const distance = Math.sqrt(
+//         Math.pow(currentX - lastX, 2) +
+//         Math.pow(currentY - lastY, 2)
+//     );
+
+//     cursorGlobalState.speed = distance / timeElapsed; // Velocidade em pixels/ms
+
+//     lastPosition = currentPosition;
+//     lastTime = currentTime;
+// };
+
 const cursorGlobalState = (() => {
     const cursorPosition = {
         x: null,
         y: null,
         lastX: null,
         lastY: null,
+        speed: 0,
+        lastTime: null,
         mouseDownTime: null,
         mouseDown: false,
     };
     // Updates the cursor coordinates globally
     window.addEventListener('mousemove', (e) => {        
+        const currentTime = Date.now();
+
         cursorPosition.lastX = cursorPosition.x;
         cursorPosition.lastY = cursorPosition.y;
 
         cursorPosition.x = e.clientX; // 'X' position in relation to the viewport
         cursorPosition.y = e.clientY; // 'Y' position in relation to the viewport
+
+        // Speed control
+        if (cursorPosition.lastX !== null && cursorPosition.lastY !== null) {
+            const distance = Math.sqrt(
+                Math.pow(cursorPosition.x - cursorPosition.lastX, 2) +
+                Math.pow(cursorPosition.y - cursorPosition.lastY, 2)
+            );
+            const timeElapsed = currentTime - (cursorPosition.lastTime || currentTime);
+            cursorPosition.speed = timeElapsed > 0 ? distance / timeElapsed : 0;
+        }
+        cursorPosition.lastTime = currentTime;
+        
         
         if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
 
         if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight && element.target) backToPosition(element.target); //Browser window edge control
-    
+        
+        //console.log('speed', cursorPosition.speed);
+
+        if (cursorPosition.speed > 2.5) backToPosition(element.target);
     });
     // Detects when the mouse button (left one) is clicked
     window.addEventListener('mousedown', () => {
@@ -134,6 +171,10 @@ const cursorGlobalState = (() => {
     
     return cursorPosition;
 })();
+
+function cursorSpeed(current) {
+    
+}
 
 function followCursor(target) {    
     if(!element.offsetX || !element.offsetY) return;
