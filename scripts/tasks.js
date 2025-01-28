@@ -210,4 +210,4 @@ function totalTasks(){ //Shows (and update) how many tasks left to complete
     taskFilters.textContent = `${total} items left`;
 }
 
-export {createTask, renderTasks, deleteTask, totalTasks, getTodo};
+export { createTask, renderTasks, deleteTask, totalTasks, getTodo };

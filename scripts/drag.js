@@ -1,4 +1,4 @@
-import { treatOverlapping, reorderItens } from './overlap.js'
+import { switchItem, treatOverlapping, reorderItens } from './overlap.js'
 import { getTodo } from './tasks.js';
 import { keyboardActive } from './main.js';
 
@@ -273,6 +273,10 @@ function backToPosition(item) {
 
     switchTasksPostion();
     element.target = null;
+
+    switchItem.back = false;
+    switchItem.last = null;
+    clearTimeout(switchItem.timer);
 };
 
 function applyCursorEvents(box){
@@ -289,17 +293,6 @@ function applyCursorEvents(box){
         box.style.height = `${item.offsetHeight}px`
     });
     resizeObserver.observe(item);
-
-    const positionObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                //console.log('Posição modificada:', rect(box).left, rect(box).top);
-                //console.log(item);
-                
-            }
-        });
-    });
-    positionObserver.observe(box, { attributes: true });
 
     item.addEventListener('mousedown', e => {
         e.preventDefault();
@@ -328,7 +321,7 @@ function applyCursorEvents(box){
         }, 250);
     });
     
-    item.addEventListener('mousemove', () => {
+    item.addEventListener('mousemove', () => {   
         if (element.target) {
             if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
                 element.offsetY = cursorGlobalState.y - rect(element.target).top;
@@ -461,4 +454,4 @@ function applyCursorEvents(box){
     
 };
 
-export {element, keyboardActive, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents}
+export { element, keyboardActive, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents }

@@ -96,4 +96,4 @@ function moveFilterButtons() {
     };
 };
 
-export {state, filterButtons, applyFilterButton, displayElement, moveFilterButtons};
+export { state, filterButtons, applyFilterButton, displayElement, moveFilterButtons };

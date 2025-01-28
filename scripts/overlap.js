@@ -22,9 +22,9 @@ function overlappingStatus(draggedItem, overlappingItem) {
     return 0;// No overlapping
 };
 
-let switchThrottle = false;
+//let switchThrottle = false;
 function switchItens(draggedItem, overlappingItem) {
-    if (switchThrottle) return
+    //if (switchThrottle) return
       
     if (!draggedItem || !overlappingItem || !draggedItem.parentElement || !overlappingItem.parentElement) return; // Element validation  
     
@@ -39,14 +39,15 @@ function switchItens(draggedItem, overlappingItem) {
      // Switches elements in DOM
     draggedItemBox.append(overlappingItem);
     overlappingItemBox.append(draggedItem);
+    //switchBack = false;
     //Throttle control
-    switchThrottle = true;
-    setTimeout(() => {
-        switchThrottle = false;
-    }, 500);
 };
 
-let switchBack = false;
+let switchItem = {
+    back: false,
+    last: null,
+    timer: null
+};
 function treatOverlapping(boxes){     
     const items = boxes.map(box => box.querySelector('.task'));
     const targetBox = boxes.find(box => box.contains(element.target));
@@ -65,21 +66,35 @@ function treatOverlapping(boxes){
         const largestOverlapItem = getMaxOverlapItem(element.target, [item, targetBox]);
         const overlapItems = overlappingStatus(element.target, item);
 
-        if(item.hasAttribute('overlapping') && switchBack && item === largestOverlapItem){
+        if(overlapItems && item.hasAttribute('overlapping') && switchItem.back && item === largestOverlapItem){
             switchItens(element.target, item);
+        
+            clearTimeout(switchItem.timer);
+            switchItem.back = false;
+
+            switchItem.timer = setTimeout(() => {
+                switchItem.back = true;
+            }, 500);
         };
 
         if (overlapItems && !item.hasAttribute('overlapping') && item === largestOverlapItem){
             item.setAttribute('overlapping', '');
+
             if(!element.target.hasAttribute('outlist') && (index === targetIndices.after || index === targetIndices.before)){   
                 switchItens(element.target, item);
 
-                switchBack = true;
+                clearTimeout(switchItem.timer);
+                switchItem.back = false;
+
+                switchItem.timer = setTimeout(() => {
+                    switchItem.back = true;
+                }, 500);
             }
 
         } else if (!overlapItems && item.hasAttribute('overlapping')) {
             item.removeAttribute('overlapping');
-            switchBack = false;
+            switchItem.back = false;
+
         }
     });
 };
@@ -175,18 +190,18 @@ function reorderItens(boxes){
         moveItem(element.target, items, boxes, draggedItemIndex, 1);
     };
     
-    if(overlapAnyBox && !isOutList && !targetBoxOverlap){ //Item moves 'inside' the list
-        element.target.removeAttribute('outlist');
-        const initialTargetIndex = boxes.findIndex(box => box.contains(element.target));
-        const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);
+    // if(overlapAnyBox && !isOutList && !targetBoxOverlap){ //Item moves 'inside' the list
+    //     element.target.removeAttribute('outlist');
+    //     const initialTargetIndex = boxes.findIndex(box => box.contains(element.target));
+    //     const draggedItemIndex = findDraggedIndex(element.target, boxes, overlapItems, targetBox);
 
-        if(draggedItemIndex !== null && draggedItemIndex !== initialTargetIndex){
-            const moveFromIndex = draggedItemIndex > initialTargetIndex ? initialTargetIndex : draggedItemIndex;
-            const direction = draggedItemIndex > initialTargetIndex ? -1 : 1;
+    //     if(draggedItemIndex !== null && draggedItemIndex !== initialTargetIndex){
+    //         const moveFromIndex = draggedItemIndex > initialTargetIndex ? initialTargetIndex : draggedItemIndex;
+    //         const direction = draggedItemIndex > initialTargetIndex ? -1 : 1;
 
-            moveItem(element.target, items, boxes, moveFromIndex, direction);
-        };
-    };
+    //         moveItem(element.target, items, boxes, moveFromIndex, direction);
+    //     };
+    // };
 };
 
-export { treatOverlapping, reorderItens }
+export { switchItem, treatOverlapping, reorderItens }
