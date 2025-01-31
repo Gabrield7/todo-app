@@ -22,7 +22,7 @@ function getDeviceType() {
     } else {
         return 'desktop';
     }
-}
+};
 
 const rect = target => target.getBoundingClientRect();
 
@@ -76,24 +76,6 @@ function isInsideItemArea(xPosition, yPosition){
     );
 };
 
-// function cursorSpeed(currentX, currentY, lastX, lastY) {
-//     const currentTime = Date.now();
-//     const timeElapsed = currentTime - lastTime;
-
-//     if (timeElapsed === 0) return; // Evitar divisões por zero
-
-//     //const currentPosition = { x: event.clientX, y: event.clientY };
-//     const distance = Math.sqrt(
-//         Math.pow(currentX - lastX, 2) +
-//         Math.pow(currentY - lastY, 2)
-//     );
-
-//     cursorGlobalState.speed = distance / timeElapsed; // Velocidade em pixels/ms
-
-//     lastPosition = currentPosition;
-//     lastTime = currentTime;
-// };
-
 const cursorGlobalState = (() => {
     const cursorPosition = {
         x: null,
@@ -103,7 +85,7 @@ const cursorGlobalState = (() => {
         speed: 0,
         lastTime: null,
         mouseDownTime: null,
-        mouseDown: false,
+        mouseDown: false
     };
     // Updates the cursor coordinates globally
     window.addEventListener('mousemove', (e) => {        
@@ -126,14 +108,11 @@ const cursorGlobalState = (() => {
         }
         cursorPosition.lastTime = currentTime;
         
-        
         if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
 
         if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight && element.target) backToPosition(element.target); //Browser window edge control
-        
-        //console.log('speed', cursorPosition.speed);
 
-        if (cursorPosition.speed > 2.5) backToPosition(element.target);
+        if (cursorPosition.speed > 3) backToPosition(element.target);
     });
     // Detects when the mouse button (left one) is clicked
     window.addEventListener('mousedown', () => {
@@ -160,21 +139,17 @@ const cursorGlobalState = (() => {
         
         });
         // Detects when the mouse button (left one) is clicked
-        window.addEventListener('touchstart', () => {
+        window.addEventListener('touchstart', (e) => {
             cursorPosition.mouseDown = true;
         });
         // Detects when the mouse button (left one) has been released
-        window.addEventListener('touchend', () => {
+        window.addEventListener('touchend', (e) => {
             cursorPosition.mouseDown = false;
         });
     };
     
     return cursorPosition;
 })();
-
-function cursorSpeed(current) {
-    
-}
 
 function followCursor(target) {    
     if(!element.offsetX || !element.offsetY) return;
@@ -316,7 +291,6 @@ function backToPosition(item) {
     element.target = null;
 
     switchItem.back = false;
-    switchItem.last = null;
     clearTimeout(switchItem.timer);
 };
 
@@ -363,18 +337,18 @@ function applyCursorEvents(box){
     });
     
     item.addEventListener('mousemove', () => {   
-        if (element.target) {
-            if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
-                element.offsetY = cursorGlobalState.y - rect(element.target).top;
-                element.offsetX = cursorGlobalState.x - rect(element.target).left;
-                element.locked = true;
-            };
+        if(!element.target) return;
 
-            requestAnimationFrame(() => {
-                treatOverlapping(boxes());
-                reorderItens(boxes());
-            });
+        if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
+            element.offsetY = cursorGlobalState.y - rect(element.target).top;
+            element.offsetX = cursorGlobalState.x - rect(element.target).left;
+            element.locked = true;
         };
+
+        requestAnimationFrame(() => {
+            treatOverlapping(boxes());
+            reorderItens(boxes());
+        });
     });
 
     item.addEventListener('mouseup', () => {
@@ -398,16 +372,8 @@ function applyCursorEvents(box){
     });
 
     if(getDeviceType() !== 'desktop'){
-        let isTouchActive = false;
+        
         item.addEventListener('touchstart', (e) => { 
-            if (isTouchActive) {
-                e.stopPropagation();
-                e.preventDefault();
-                console.log('Outro toque bloqueado.');
-                return;
-            };
-            isTouchActive = true;
-            
             const excludedSelectors = ['input', 'label', 'button'];
             if (!excludedSelectors.some(selector => e.target.matches(selector))) e.preventDefault();
     
@@ -466,22 +432,19 @@ function applyCursorEvents(box){
             });
     
             if(element.target === item) backToPosition(item);
+        });
 
-            isTouchActive = false;
+        item.addEventListener('touchcancel', () => {
+            clearTimeout(cursorGlobalState.mouseDownTime);
+    
+            allItems().forEach(task => {
+                if(task.hasAttribute('overlapping')) task.removeAttribute('overlapping');
+            });
+    
+            if(element.target === item) backToPosition(item);
         });
     };
 
-    window.addEventListener('scroll', (e) => {
-        if(!element.target) return;
-
-        // const scrollX = window.scrollX;
-        // const scrollY = window.scrollY;
-
-        // let left = rect(element.target).left + scrollX;
-        // let top = rect(element.target).top + scrollY;
-
-        followCursor(element.target)
-    });
     //Adjust the task element position when the viewport is rezided
     window.addEventListener('resize', () => { 
         if(getDeviceType() !== 'desktop') return;
@@ -491,8 +454,6 @@ function applyCursorEvents(box){
 
         setElementPosition(item, { positionCallback: rect, referenceItem: box });
     });
-
-    
 };
 
-export { element, keyboardActive, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents }
+export { element, keyboardActive, cursorGlobalState, backToPosition, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents }

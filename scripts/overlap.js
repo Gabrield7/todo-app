@@ -1,4 +1,4 @@
-import { element, rect, setElementPosition, insideItemArea } from "./drag.js";
+import { element, rect, backToPosition, setElementPosition, insideItemArea } from "./drag.js";
 
 function overlappingStatus(draggedItem, overlappingItem) {
     const draggedRect = rect(draggedItem);
@@ -17,15 +17,12 @@ function overlappingStatus(draggedItem, overlappingItem) {
         const overlapHeight = Math.abs(Math.min(draggedRect.bottom, overlapRect.bottom) - Math.max(draggedRect.top, overlapRect.top));
         
         return overlapWidth * overlapHeight; // Returns the overlapping area
-    }
+    };
 
     return 0;// No overlapping
 };
 
-//let switchThrottle = false;
 function switchItens(draggedItem, overlappingItem) {
-    //if (switchThrottle) return
-      
     if (!draggedItem || !overlappingItem || !draggedItem.parentElement || !overlappingItem.parentElement) return; // Element validation  
     
     const draggedItemBox = draggedItem.parentElement;
@@ -39,13 +36,10 @@ function switchItens(draggedItem, overlappingItem) {
      // Switches elements in DOM
     draggedItemBox.append(overlappingItem);
     overlappingItemBox.append(draggedItem);
-    //switchBack = false;
-    //Throttle control
 };
 
 let switchItem = {
     back: false,
-    last: null,
     timer: null
 };
 function treatOverlapping(boxes){     
@@ -65,6 +59,7 @@ function treatOverlapping(boxes){
 
         const largestOverlapItem = getMaxOverlapItem(element.target, [item, targetBox]);
         const overlapItems = overlappingStatus(element.target, item);
+        if (overlapItems) console.log('overlapping')
 
         if(overlapItems && item.hasAttribute('overlapping') && switchItem.back && item === largestOverlapItem){
             switchItens(element.target, item);
@@ -75,6 +70,8 @@ function treatOverlapping(boxes){
             switchItem.timer = setTimeout(() => {
                 switchItem.back = true;
             }, 500);
+
+            if((index !== targetIndices.after || index !== targetIndices.before)) backToPosition(element.target);
         };
 
         if (overlapItems && !item.hasAttribute('overlapping') && item === largestOverlapItem){
@@ -204,4 +201,4 @@ function reorderItens(boxes){
     // };
 };
 
-export { switchItem, treatOverlapping, reorderItens }
+export { switchItem, getRectWithScroll, treatOverlapping, reorderItens }
