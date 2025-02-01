@@ -254,7 +254,7 @@ body.dark .add-task, body.dark .task,  body.dark .task-filters, body.dark .filte
 }
 
 body.dark .task-description, body.dark .add-task>input{
-    color: var(--very-light-grayish-blue) !important;
+    color: var(--very-light-grayish-blue);
 }
 
 body.dark .add-task>input::placeholder{

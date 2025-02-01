@@ -1,4 +1,4 @@
-import { createTask, renderTasks, totalTasks, getTodo } from "./tasks.js";
+import { createTask, renderTasks, totalTasks, getTodo, strikeDescription } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
 import { element, autoScroll, applyCursorEvents } from './drag.js'
 
@@ -42,6 +42,37 @@ if (!state.selectedFilter) {
     localStorage.setItem('todo', JSON.stringify(todo));
 }
 
+//RENDERER CONTENT
+async function init() {
+    const renderedTasks = await renderTasks();
+    if (!renderedTasks || renderedTasks.length === 0) return;
+
+    Array.from(renderedTasks).forEach(box => applyCursorEvents(box));
+}
+init();
+
+totalTasks();
+applyFilterButton();
+
+let margin = {
+    top: 10,
+    bottom: window.innerHeight - 10
+};
+allItems().forEach(item => {
+    const marginObserver = new IntersectionObserver((entries) => {
+        if(item !== element.target) return;
+    
+        entries.forEach(entry => {
+            const rect = entry.target.getBoundingClientRect();
+            
+            if (rect.bottom > margin.bottom) autoScroll(1);
+            if (rect.top < margin.top) autoScroll(-1);
+        });
+    }, { threshold: [0, 1] });
+
+    marginObserver.observe(item)
+});
+
 //THEME
 function updateTheme(theme) {
     if (theme === 'dark') {
@@ -59,39 +90,11 @@ theme.addEventListener('click', (e) => { // Switches the theme when click the 't
     e.preventDefault();
     const newTheme = body.classList.toggle('dark')? 'dark' : 'light';
     updateTheme(newTheme);
-});
 
-//RENDERER CONTENT
-async function init() {
-    const renderedTasks = await renderTasks();
-    if (!renderedTasks || renderedTasks.length === 0) return;
-
-    Array.from(renderedTasks).forEach(box => applyCursorEvents(box));
-}
-init();
-
-totalTasks();
-applyFilterButton();
-
-let margin = {
-    top: 10,
-    bottom: window.innerHeight - 10
-}
-allItems().forEach(item => {
-    const observer = new IntersectionObserver((entries) => {
-        if(item !== element.target) return;
-    
-        entries.forEach(entry => {
-            const rect = entry.target.getBoundingClientRect();
-            
-            if (rect.bottom > margin.bottom) {
-                autoScroll(1);
-            } else if (rect.top < margin.top){
-                autoScroll(-1);
-            };
-        });
-    }, { threshold: [0, 1] });
-    observer.observe(item);
+    allItems().forEach(item => {
+        const input = item.querySelector('input');
+        strikeDescription(input);
+    })
 });
 
 window.addEventListener('resize', moveFilterButtons);

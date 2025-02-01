@@ -3,6 +3,8 @@ import { applyCursorEvents, rect, boxPosition, setElementPosition } from './drag
 
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
+const theme = document.querySelector('.theme-button');
+const body = document.querySelector('body');
 
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
 
@@ -185,20 +187,16 @@ function taskCheckEvent(input){
         totalTasks();
 
         displayElement(state.selectedFilter);
-        //if(input.checked) input.blur();
     });
 };
 
 function strikeDescription(input){ //Adds an 'strike' effect to content tasks marked as completed 
     const taskDescription = input.parentElement.querySelector('.task-description');
-    
-    if (!taskDescription.dataset.originalColor) {
-        const originalColor = window.getComputedStyle(taskDescription).getPropertyValue('color'); //Gets the propert 'color' regitered in css file
-        taskDescription.dataset.originalColor = originalColor; //Save the original color
-    }
-    
+
+    const originalColor = getTodo().theme === 'dark'? 'var(--very-light-grayish-blue)':'var(--very-dark-grayish-blue)';
+
     taskDescription.style.textDecoration = input.checked ? 'line-through':'none';
-    taskDescription.style.color = input.checked ? 'var(--dark-grayish-blue)':taskDescription.dataset.originalColor;
+    taskDescription.style.color = input.checked ? 'var(--dark-grayish-blue)':originalColor;
 }
 
 function totalTasks(){ //Shows (and update) how many tasks left to complete
@@ -210,4 +208,4 @@ function totalTasks(){ //Shows (and update) how many tasks left to complete
     taskFilters.textContent = `${total} items left`;
 }
 
-export { createTask, renderTasks, deleteTask, totalTasks, getTodo };
+export { createTask, renderTasks, deleteTask, totalTasks, getTodo, strikeDescription };
