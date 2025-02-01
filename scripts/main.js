@@ -1,11 +1,13 @@
 import { createTask, renderTasks, totalTasks, getTodo } from "./tasks.js";
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
-import { applyCursorEvents } from './drag.js'
+import { element, autoScroll, applyCursorEvents } from './drag.js'
 
 const todo = getTodo();
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
+const boxes = () => Array.from(document.getElementsByClassName('task-box'));
+const allItems = () => boxes().map(box => box.querySelector('.task'));
 
 //TASKS 
 addTaskInput.addEventListener('keydown', (e) => {
@@ -22,7 +24,6 @@ export let keyboardActive = false;
 addTaskInput.addEventListener('focusin', () => {
     keyboardActive = true;
     console.log('teclado ativo');
-
 });
 
 addTaskInput.addEventListener('focusout', () => {
@@ -71,6 +72,27 @@ init();
 
 totalTasks();
 applyFilterButton();
+
+let margin = {
+    top: 10,
+    bottom: window.innerHeight - 10
+}
+allItems().forEach(item => {
+    const observer = new IntersectionObserver((entries) => {
+        if(item !== element.target) return;
+    
+        entries.forEach(entry => {
+            const rect = entry.target.getBoundingClientRect();
+            
+            if (rect.bottom > margin.bottom) {
+                autoScroll(1);
+            } else if (rect.top < margin.top){
+                autoScroll(-1);
+            };
+        });
+    }, { threshold: [0, 1] });
+    observer.observe(item);
+});
 
 window.addEventListener('resize', moveFilterButtons);
 document.addEventListener('DOMContentLoaded', moveFilterButtons);

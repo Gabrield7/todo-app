@@ -59,7 +59,6 @@ function treatOverlapping(boxes){
 
         const largestOverlapItem = getMaxOverlapItem(element.target, [item, targetBox]);
         const overlapItems = overlappingStatus(element.target, item);
-        if (overlapItems) console.log('overlapping')
 
         if(overlapItems && item.hasAttribute('overlapping') && switchItem.back && item === largestOverlapItem){
             switchItens(element.target, item);
@@ -69,9 +68,13 @@ function treatOverlapping(boxes){
 
             switchItem.timer = setTimeout(() => {
                 switchItem.back = true;
-            }, 500);
+            }, 250);
 
-            if((index !== targetIndices.after || index !== targetIndices.before)) backToPosition(element.target);
+            // if((index !== targetIndices.after || index !== targetIndices.before)){
+            //     backToPosition(element.target);
+            //     console.log('here');
+                
+            // } 
         };
 
         if (overlapItems && !item.hasAttribute('overlapping') && item === largestOverlapItem){
@@ -85,7 +88,7 @@ function treatOverlapping(boxes){
 
                 switchItem.timer = setTimeout(() => {
                     switchItem.back = true;
-                }, 500);
+                }, 250);
             }
 
         } else if (!overlapItems && item.hasAttribute('overlapping')) {
@@ -201,4 +204,4 @@ function reorderItens(boxes){
     // };
 };
 
-export { switchItem, getRectWithScroll, treatOverlapping, reorderItens }
+export { switchItem, treatOverlapping, reorderItens }

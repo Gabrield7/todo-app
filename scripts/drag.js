@@ -2,6 +2,7 @@ import { switchItem, treatOverlapping, reorderItens } from './overlap.js'
 import { getTodo } from './tasks.js';
 import { keyboardActive } from './main.js';
 
+const body = document.querySelector('body');
 const tasksList = document.querySelector('.list-tasks');
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
 const allItems = () => boxes().map(box => box.querySelector('.task'));
@@ -76,6 +77,38 @@ function isInsideItemArea(xPosition, yPosition){
     );
 };
 
+let scroll = {
+    is: false,
+    interval: null,
+    direction: null
+}
+function autoScroll(direction){
+    if (scroll.is || !element.target) return;
+    scroll.is = true;
+
+    scroll.interval = setInterval(() => {
+        if(direction > 0){
+            scroll.direction = 1
+            if (window.innerHeight >= rect(tasksList).bottom || !element.target) {
+                clearInterval(scroll.interval);
+                scroll.is = false;
+                return;
+            };
+        } else {
+            scroll.direction = -1
+            if (window.innerHeight <= rect(tasksList).top || !element.target) {
+                clearInterval(scroll.interval);
+                scroll.is = false;
+                return;
+            };
+        };
+
+        window.scrollBy(0, direction); // Moves the scroll down progressively
+        followCursor(element.target);
+        
+    }, 5);
+};
+
 const cursorGlobalState = (() => {
     const cursorPosition = {
         x: null,
@@ -112,7 +145,19 @@ const cursorGlobalState = (() => {
 
         if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight && element.target) backToPosition(element.target); //Browser window edge control
 
+        //Speed control
         if (cursorPosition.speed > 3) backToPosition(element.target);
+
+        //Auto scroll control
+        const delta = { //Cursor displacement in relation to the previous movement
+            x: cursorGlobalState.x - cursorGlobalState.lastX || 0,
+            y: cursorGlobalState.y - cursorGlobalState.lastY || 0
+        };
+
+        if(scroll.is && delta.y < 0 && scroll.direction === 1 || delta.y > 0 && scroll.direction === -1){
+            clearInterval(scroll.interval);
+            scroll.is = false;
+        };
     });
     // Detects when the mouse button (left one) is clicked
     window.addEventListener('mousedown', () => {
@@ -147,6 +192,12 @@ const cursorGlobalState = (() => {
             cursorPosition.mouseDown = false;
         });
     };
+
+    window.addEventListener('scroll', () => {
+        if(!element.target) return;
+
+        treatOverlapping(boxes());
+    });
     
     return cursorPosition;
 })();
@@ -235,7 +286,6 @@ function followCursor(target) {
 
         };
     };
-    
     setElementPosition(element.target, { left, top });
 };
 
@@ -267,7 +317,7 @@ function backToPosition(item) {
     const boxItem = item.parentElement;
     
     if (!item.style.transition){
-        item.style.transition = 'all 1s ease-in-out';
+        item.style.transition = `all .5s ease-in-out`;
     };
 
     requestAnimationFrame(() => {
@@ -283,7 +333,7 @@ function backToPosition(item) {
         });
 
         element.locked = false;
-    }, 1000);
+    }, 500);
 
     element.target.removeAttribute('outlist');
 
@@ -333,7 +383,7 @@ function applyCursorEvents(box){
                     element.offsetY = cursorGlobalState.y - rect(element.target).top;
                 };
             };
-        }, 250);
+        }, 200);
     });
     
     item.addEventListener('mousemove', () => {   
@@ -372,7 +422,6 @@ function applyCursorEvents(box){
     });
 
     if(getDeviceType() !== 'desktop'){
-        
         item.addEventListener('touchstart', (e) => { 
             const excludedSelectors = ['input', 'label', 'button'];
             if (!excludedSelectors.some(selector => e.target.matches(selector))) e.preventDefault();
@@ -456,4 +505,4 @@ function applyCursorEvents(box){
     });
 };
 
-export { element, keyboardActive, cursorGlobalState, backToPosition, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents }
+export { element, keyboardActive, cursorGlobalState, autoScroll, backToPosition, insideItemArea, boxPosition, rect, setElementPosition, applyCursorEvents };
