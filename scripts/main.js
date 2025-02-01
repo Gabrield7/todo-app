@@ -2,7 +2,6 @@ import { createTask, renderTasks, totalTasks, getTodo, strikeDescription } from 
 import { filterButtons, state, applyFilterButton, moveFilterButtons } from "./filters.js";
 import { element, autoScroll, applyCursorEvents } from './drag.js'
 
-const todo = getTodo();
 const theme = document.querySelector('.theme-button');
 const body = document.querySelector('body');
 const addTaskInput = document.querySelector('.add-task input');
@@ -23,16 +22,15 @@ addTaskInput.addEventListener('keydown', (e) => {
 export let keyboardActive = false;
 addTaskInput.addEventListener('focusin', () => {
     keyboardActive = true;
-    console.log('teclado ativo');
 });
 
 addTaskInput.addEventListener('focusout', () => {
     keyboardActive = false;
-    console.log('teclado inativo');
 });
 
 //FILTERS
 if (!state.selectedFilter) {
+    const todo = getTodo();
     const defaultFilter = filterButtons[0]; // 'All'
     const savedFilter = [...filterButtons].find(btn => btn.textContent === todo.filter) || defaultFilter;
 
@@ -75,6 +73,7 @@ allItems().forEach(item => {
 
 //THEME
 function updateTheme(theme) {
+    const todo = getTodo();
     if (theme === 'dark') {
         body.classList.add('dark');
     } else {
@@ -82,19 +81,19 @@ function updateTheme(theme) {
     }
     todo.theme = theme;
     localStorage.setItem('todo', JSON.stringify(todo));
-}
+};
 
-updateTheme(todo.theme || 'light'); // Initialize the item when the pages reload
+updateTheme(getTodo().theme || 'light'); // Initialize the item when the pages reload
 
 theme.addEventListener('click', (e) => { // Switches the theme when click the 'theme' button
     e.preventDefault();
     const newTheme = body.classList.toggle('dark')? 'dark' : 'light';
     updateTheme(newTheme);
-
+    
     allItems().forEach(item => {
         const input = item.querySelector('input');
         strikeDescription(input);
-    })
+    });
 });
 
 window.addEventListener('resize', moveFilterButtons);

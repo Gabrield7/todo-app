@@ -3,10 +3,9 @@ import { applyCursorEvents, rect, boxPosition, setElementPosition } from './drag
 
 const addTaskInput = document.querySelector('.add-task input');
 const tasksList = document.querySelector('.list-tasks');
-const theme = document.querySelector('.theme-button');
-const body = document.querySelector('body');
 
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
+const allItems = () => boxes().map(box => box.querySelector('.task'));
 
 function getTodo(){
     const initialTodo = {
@@ -92,7 +91,6 @@ function createTask(){
     taskCheckEvent(input);
 
     //Shows the task element
-    const taskBoxes = tasksList.querySelectorAll('.task-box');
     displayElement(state.selectedFilter);
     
     applyCursorEvents(taskBox);
@@ -102,10 +100,8 @@ function createTask(){
             const item = box.querySelector('.task');
     
             setElementPosition(item, { positionCallback: rect, referenceItem: box });
-            console.log('reposicioned'); 
         });
-    }, 10)
-
+    }, 10);
 };
 
 function deleteTask(element){
@@ -135,7 +131,9 @@ function deleteTask(element){
             
             setElementPosition(item, { positionCallback: rect, referenceItem: box });
         });
-    }, 10)
+    }, 10);
+
+    console.log(getTodo().tasks.length);
 };
 
 function deleteEventClick(button){
