@@ -68,13 +68,7 @@ function treatOverlapping(boxes){
 
             switchItem.timer = setTimeout(() => {
                 switchItem.back = true;
-            }, 250);
-
-            // if((index !== targetIndices.after || index !== targetIndices.before)){
-            //     backToPosition(element.target);
-            //     console.log('here');
-                
-            // } 
+            }, 400);
         };
 
         if (overlapItems && !item.hasAttribute('overlapping') && item === largestOverlapItem){
@@ -88,7 +82,7 @@ function treatOverlapping(boxes){
 
                 switchItem.timer = setTimeout(() => {
                     switchItem.back = true;
-                }, 250);
+                }, 400);
             }
 
         } else if (!overlapItems && item.hasAttribute('overlapping')) {
@@ -138,17 +132,6 @@ function findDraggedIndex (target, boxes, overlapItems, targetBox) {
 const moveItem = (target, items, boxes, startIndex, direction) => {
     boxes.forEach((box, index) => {
         const item = items[index];
-
-        // if (item.style.transition) { //In case the animation get interrupted
-        //     const computedStyle = window.getComputedStyle(item);
-        //     const currentLeft = computedStyle.left;
-        //     const currentTop = computedStyle.top;
-        //     item.style.transition = 'none';
-        //     item.style.left = currentLeft;
-        //     item.style.top = currentTop;
-        //     void item.offsetWidth;
-        //     item.style.transition = 'all 0.5s ease-in-out';
-        // }
 
         if (index >= startIndex && item && item !== target) {
             requestAnimationFrame(() => {

@@ -2,7 +2,6 @@ import { switchItem, treatOverlapping, reorderItens } from './overlap.js'
 import { getTodo } from './tasks.js';
 import { keyboardActive } from './main.js';
 
-const body = document.querySelector('body');
 const tasksList = document.querySelector('.list-tasks');
 const boxes = () => Array.from(document.getElementsByClassName('task-box'));
 const allItems = () => boxes().map(box => box.querySelector('.task'));
@@ -80,7 +79,7 @@ function isInsideItemArea(xPosition, yPosition){
 let scroll = {
     is: false,
     interval: null,
-    direction: null
+    direction: null,
 }
 function autoScroll(direction){
     if (scroll.is || !element.target) return;
@@ -105,7 +104,6 @@ function autoScroll(direction){
 
         window.scrollBy(0, direction); // Moves the scroll down progressively
         followCursor(element.target);
-        
     }, 5);
 };
 
@@ -175,28 +173,40 @@ const cursorGlobalState = (() => {
             cursorPosition.lastX = cursorPosition.x;
             cursorPosition.lastY = cursorPosition.y;
     
-            cursorPosition.x = touch.pageX; // 'X' position in relation to the viewport
-            cursorPosition.y = touch.pageY; // 'Y' position in relation to the viewport
+            cursorPosition.x = touch.clientX; // 'X' position in relation to the viewport
+            cursorPosition.y = touch.clientY; // 'Y' position in relation to the viewport
             
             if(element.target && cursorGlobalState.mouseDown) followCursor(element.target);
     
             if (cursorPosition.x < 0 || cursorPosition.x > window.innerWidth || cursorPosition.y < 0 || cursorPosition.y > window.innerHeight && element.target) backToPosition(element.target); //Browser window edge control
-        
+            
+            //Auto scroll control
+            const delta = { //Cursor displacement in relation to the previous movement
+                x: cursorGlobalState.x - cursorGlobalState.lastX || 0,
+                y: cursorGlobalState.y - cursorGlobalState.lastY || 0
+            };
+
+            if(scroll.is && delta.y < 0 && scroll.direction === 1 || delta.y > 0 && scroll.direction === -1){
+                clearInterval(scroll.interval);
+                scroll.is = false;
+            };
         });
-        // Detects when the mouse button (left one) is clicked
-        window.addEventListener('touchstart', (e) => {
+        
+        window.addEventListener('touchstart', () => {
             cursorPosition.mouseDown = true;
         });
-        // Detects when the mouse button (left one) has been released
-        window.addEventListener('touchend', (e) => {
+        
+        window.addEventListener('touchend', () => {
+            cursorPosition.mouseDown = false;
+        });
+
+        window.addEventListener('touchcancel', () => {
             cursorPosition.mouseDown = false;
         });
     };
 
     window.addEventListener('scroll', () => {
-        if(!element.target) return;
-
-        treatOverlapping(boxes());
+        if(element.target) treatOverlapping(boxes());
     });
     
     return cursorPosition;
@@ -267,8 +277,8 @@ function followCursor(target) {
         if (targetRect.bottom >= rect(tasksList).bottom || targetRect.top <= rect(tasksList).top) {
             // Bottom edge
             if (targetRect.bottom >= rect(tasksList).bottom) {
-                top = rect(tasksList).bottom - rect(element.target).height; // Calculation of 'Top' variable for the right edge
-
+                top = rect(element.target).top; // Calculation of 'Top' variable for the right edge
+                
                 if (delta.y <= 0) { // When the cursor moves in the opposite edge, the element must get grabbed back to the cursor 
                     element.offsetY = cursorGlobalState.lastY - targetRect.top;
                     top = cursorGlobalState.y - element.offsetY; // Updates the 'Y' position to follow the cursor
@@ -317,7 +327,7 @@ function backToPosition(item) {
     const boxItem = item.parentElement;
     
     if (!item.style.transition){
-        item.style.transition = `all .5s ease-in-out`;
+        item.style.transition = `all 1s ease-in-out`;
     };
 
     requestAnimationFrame(() => {
@@ -333,7 +343,7 @@ function backToPosition(item) {
         });
 
         element.locked = false;
-    }, 500);
+    }, 1000);
 
     element.target.removeAttribute('outlist');
 
@@ -371,7 +381,7 @@ function applyCursorEvents(box){
                 allItems().forEach(task => {
                     if (element.target) {
                         if (task !== element.target && !task.style.transition) {
-                            task.style.transition = 'all .5s ease-in-out';
+                            task.style.transition = 'all .4s ease-in-out';
                         };
                         task.style.opacity = task === element.target? 1 : 0.5;
                         task.style.zIndex = task === element.target? 1 : 0;
@@ -424,53 +434,51 @@ function applyCursorEvents(box){
     if(getDeviceType() !== 'desktop'){
         item.addEventListener('touchstart', (e) => { 
             const excludedSelectors = ['input', 'label', 'button'];
-            if (!excludedSelectors.some(selector => e.target.matches(selector))) e.preventDefault();
-    
+            if (e.cancelable && !excludedSelectors.some(selector => e.target.matches(selector))) e.preventDefault();
+
             cursorGlobalState.mouseDownTime = setTimeout(() => {
-                if (!element.locked){
-                    element.target = e.target.closest('.task'); //Selects the element
-                    
-                    allItems().forEach(task => {
-                        if (element.target) {
-                            if (task !== element.target && !task.style.transition) {
-                                task.style.transition = 'all .5s ease-in-out';
-                            };
-                            task.style.opacity = task === element.target? 1 : 0.5;
-                            task.style.zIndex = task === element.target? 1 : 0;
-                        } 
-                    });
-                    
-                    const touch = e.changedTouches[0];
-                    if (isInsideItemArea(touch.pageX, touch.pageY)) {
-                        element.offsetX = touch.pageX - rect(element.target).left;
-                        element.offsetY = touch.pageY - rect(element.target).top;
-                    };
+                if (element.locked) return;
+
+                element.target = e.target.closest('.task'); //Selects the element
+                
+                allItems().forEach(task => {
+                    if (element.target) {
+                        if (task !== element.target && !task.style.transition) {
+                            task.style.transition = 'all .4s ease-in-out';
+                        };
+                        task.style.opacity = task === element.target? 1 : 0.5;
+                        task.style.zIndex = task === element.target? 1 : 0;
+                    }; 
+                });
+                
+                const touch = e.changedTouches[0];
+                if (isInsideItemArea(touch.clientX, touch.clientY)) {
+                    element.offsetX = touch.clientX - rect(element.target).left;
+                    element.offsetY = touch.clientY - rect(element.target).top;
                 };
-            }, 200);
+            }, 100);
         });
     
         item.addEventListener('touchmove', (e) => {
-            //if(keyboardActive) return;
+            if(!element.target) return;
+            
+            if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
+                const touch = e.changedTouches[0];
+                cursorGlobalState.x = touch.clientX;
+                cursorGlobalState.y = touch.clientY;
+                
+                element.offsetY = cursorGlobalState.y - rect(element.target).top;
+                element.offsetX = cursorGlobalState.x - rect(element.target).left;
 
-            if (element.target) {
-                if(!isInsideItemArea(cursorGlobalState.x, cursorGlobalState.y) && cursorGlobalState.mouseDown && !element.locked){
-                    const touch = e.changedTouches[0];
-                    cursorGlobalState.x = touch.pageX;
-                    cursorGlobalState.y = touch.pageY;
-
-                    element.offsetY = cursorGlobalState.y - rect(element.target).top;
-                    element.offsetX = cursorGlobalState.x - rect(element.target).left;
-                    
-                    if(element.offsetY <= 0 || element.offsetY >= item.offsetHeight) backToPosition(element.target);
-                    
-                    element.locked = true;
-                };
-    
-                requestAnimationFrame(() => {
-                    treatOverlapping(boxes());
-                    reorderItens(boxes());
-                });
+                if(element.offsetY <= 0 || element.offsetY >= item.offsetHeight) backToPosition(element.target);
+                
+                element.locked = true;
             };
+
+            requestAnimationFrame(() => {
+                treatOverlapping(boxes());
+                reorderItens(boxes());
+            });
         });
     
         item.addEventListener('touchend', () => {

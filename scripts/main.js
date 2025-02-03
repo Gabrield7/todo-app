@@ -68,7 +68,7 @@ allItems().forEach(item => {
         });
     }, { threshold: [0, 1] });
 
-    marginObserver.observe(item)
+    marginObserver.observe(item);
 });
 
 //THEME
