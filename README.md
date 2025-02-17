@@ -23,50 +23,30 @@ This a single page application based on [Frontend Mentor Design](https://www.fro
 
 Discover how easy it is to manage tasks with the Todo app. Below are the main features you can try:
 
-<style>
-  .gif-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .gif-table td {
-    text-align: center;
-    padding: 12px;
-    border: 1px solid #ddd;
-  }
-  .gif-table img {
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out;
-  }
-  .gif-table img:hover {
-    transform: scale(1.05);
-  }
-</style>
-
-<table class="gif-table">
+<table>
   <tr>
     <td><b>🆕 Create New Tasks</b></td>
     <td><b>🎨 Change Theme</b></td>
   </tr>
   <tr>
-    <td><img src="./images/gifs/create-new-task.gif" width="280"></td>
-    <td><img src="./images/gifs/change-theme.gif" width="280"></td>
+    <td><img src="./images/gifs/create-new-task.gif" width="300"></td>
+    <td><img src="./images/gifs/change-theme.gif" width="300"></td>
   </tr>
   <tr>
     <td><b>✅ Mark Tasks as Completed</b></td>
     <td><b>🔍 Apply Filters</b></td>
   </tr>
   <tr>
-    <td><img src="./images/gifs/mark-tasks-as-completed.gif" width="280"></td>
-    <td><img src="./images/gifs/apply-filters.gif" width="280"></td>
+    <td><img src="./images/gifs/mark-tasks-as-completed.gif" width="300"></td>
+    <td><img src="./images/gifs/apply-filters.gif" width="300"></td>
   </tr>
   <tr>
     <td><b>🔄 Reorder Tasks</b></td>
     <td><b>🗑️ Delete Tasks</b></td>
   </tr>
   <tr>
-    <td><img src="./images/gifs/reorder-tasks.gif" width="280"></td>
-    <td><img src="./images/gifs/delete-tasks.gif" width="280"></td>
+    <td><img src="./images/gifs/reorder-tasks.gif" width="300"></td>
+    <td><img src="./images/gifs/delete-tasks.gif" width="300"></td>
   </tr>
 </table>
 
