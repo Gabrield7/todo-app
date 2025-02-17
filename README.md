@@ -2,39 +2,89 @@
 
 ![Design preview for the Todo app](./images/desktop-preview.jpg)
 
-## Project description
+## <b>📖 Project description</b>
 
-This a single page application based on [Frontend Mentor Desgin](https://www.frontendmentor.io/challenges/todo-app-Su1_KokOW) where you can create and save tasks <i>to do</i>. You're also able to marks the taks as conclude, exclude them and select using filters (all, active and completed).
+This a single page application based on [Frontend Mentor Design](https://www.frontendmentor.io/challenges/todo-app-Su1_KokOW) where you can create and save tasks <i>to do</i>. You're also able to marks the tasks as conclude, exclude them and select using filters (all, active and completed).
 
-## 🔨 Project features
+## <b>✨ Project features</b>
 
 - View the optimal layout for the app depending on their device's screen size;
 - See hover states for all interactive elements on the page;
-- Add new <i>todos</i> to the list;
+- Add new tasks to the list;
 - Interaction with the navigator local storage to save the tasks;
-- Mark <i>todos</i> as complete;
-- Delete <i>todos</i> from the list;
-- Filter by all/active/complete <i>todos</i>;
-- Clear all completed <i>todos</i>;
+- Mark tasks as complete;
+- Delete tasks from the list;
+- Filter by all/active/complete tasks;
+- Clear all completed tasks;
 - Toggle light and dark mode;
 - Drag and drop to reorder items on the list.
 
-## 📖 Extra details
+## <b>🛠️ How to use</b>
+
+Discover how easy it is to manage tasks with the Todo app. Below are the main features you can try:
+
+<style>
+  .gif-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .gif-table td {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+  }
+  .gif-table img {
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+  }
+  .gif-table img:hover {
+    transform: scale(1.05);
+  }
+</style>
+
+<table class="gif-table">
+  <tr>
+    <td><b>🆕 Create New Tasks</b></td>
+    <td><b>🎨 Change Theme</b></td>
+  </tr>
+  <tr>
+    <td><img src="./images/gifs/create-new-task.gif" width="280"></td>
+    <td><img src="./images/gifs/change-theme.gif" width="280"></td>
+  </tr>
+  <tr>
+    <td><b>✅ Mark Tasks as Completed</b></td>
+    <td><b>🔍 Apply Filters</b></td>
+  </tr>
+  <tr>
+    <td><img src="./images/gifs/mark-tasks-as-completed.gif" width="280"></td>
+    <td><img src="./images/gifs/apply-filters.gif" width="280"></td>
+  </tr>
+  <tr>
+    <td><b>🔄 Reorder Tasks</b></td>
+    <td><b>🗑️ Delete Tasks</b></td>
+  </tr>
+  <tr>
+    <td><img src="./images/gifs/reorder-tasks.gif" width="280"></td>
+    <td><img src="./images/gifs/delete-tasks.gif" width="280"></td>
+  </tr>
+</table>
+
+## <b>📝 Extra details</b> 
 
 - Aiming a better personalization to the drag and drop (DnD), I decided to develop a whole Dnd system from scratch by not using any native drag event from JS (dragstart, dragover, dragend, etc.);
 - This system was developed int two strands: the <b>drag.js</b> and <b>overlap.js</b>.
-- The <b>drag.js</b> is responsable for apply the moviment of the the tasks elements next to the cursor by using
+- The <b>drag.js</b> is responsible for apply the movement of the the tasks elements next to the cursor by using
 `item.style.left` and `item.style.top` property.
-- The <b>overlap.js</b> idetifies when a dragged element is overlapping other tasks and applies the interactions of switch/reorder positions;
-- The coding process was really challenging, but algo very enjoyable becasue it allows me to learn a lot more of the DOM limitations/features/interactions and the Vanilla JS itself; 
+- The <b>overlap.js</b> identifies when a dragged element is overlapping other tasks and applies the interactions of switch/reorder positions;
+- The coding process was really challenging, but algo very enjoyable because it allows me to learn a lot more of the DOM limitations/features/interactions and the Vanilla JS itself; 
 
 ## 💻 Technologies used
 
 <p>
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-plain-wordmark.svg" height=50 style="margin-right: 0px;">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-plain-wordmark.svg" height=50 style="margin-right: 5px;">
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg" height=50 style="margin-right
-: 10px;">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-plain.svg" height=50 style="margin-right: 10px;">
 </p>
 
 ## 🌐 Access
